@@ -15,46 +15,72 @@
             position: fixed;
             top: 0;
             left: 0;
-            background-color: #f0f0f0;
+            background-color: #d2d2d2;
             padding-top: 20px;
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack children vertically */
+            align-items: center; /* Center children horizontally */
         }
-
+    
+        .sidebar img {
+            width: 80%;
+            height: 60px; /* Maintain aspect ratio */
+            display: block; /* Ensure proper rendering */
+            margin-bottom: 10px; /* Add some space between images */
+        }
+    
         .content {
             margin-left: 120px; /* Adjust this value to accommodate the sidebar width */
             padding: 20px;
         }
     </style>
+    
 </head>
+
 <body>
-    <!-- Include the sidebar -->
+    <!-- sidebar.html -->
     <div class="sidebar">
         <ul>
             <div>
-                <a href="/">Home</a>
+                <a href="/">
+                    <img src="/static/images/home.png" alt="Home">
+                </a>
             </div>
 
             <div>
-                <a href="/me">Me</a>
+                <a href="/me">
+                    <img src="/static/images/me.png" alt="Me">
+                </a>
             </div>
 
             <div>
-                <a href="/my_personal_cookbook">Cookbook</a>
+                <a href="/my_personal_cookbook">
+                    <img src="/static/images/cookbook.png" alt="Cookbook">
+                </a>
             </div>
 
             <div>
-                <a href="/my_try_page">Try</a>
+                <a href="/my_try_list">
+                    <img src="/static/images/try.png" alt="My Try List">
+                </a>
             </div>
 
             <div>
-                <a href="/search">Search</a>
+                <a href="/search">
+                    <img src="/static/images/search.png" alt="Search">
+                </a>
             </div>
 
             <div>
-                <a href="/stats">Stats</a>
+                <a href="/stats">
+                    <img src="/static/images/stats.png" alt="Stats">
+                </a>
             </div>
-            
+
             <div>
-                <a href="/create_recipe">Create Recipe</a>
+                <a href="/create_recipe">
+                    <img src="/static/images/create_recipe.png" alt="Create Recipe">
+                </a>
             </div>
         </ul>
     </div>
