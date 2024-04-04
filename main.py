@@ -43,7 +43,7 @@ def get_all_items():
 @app.route("/", methods=["GET"])
 def home():
     items = get_all_items() # Call defined function to get all items
-    return render_template("index.html", items=items) # Return the page to be rendered
+    return render_template("my_personal_cookbook.html", items=items) # Return the page to be rendered
 
 # EXAMPLE OF POST REQUEST
 @app.route("/new-item", methods=["POST"])
