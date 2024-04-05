@@ -1,7 +1,8 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
-import mysql.connector
 from dotenv import load_dotenv
+from DAOs import RecipeDAO, PcbDAO
+from Models import Recipe
 
 
 # Load environment variables from .env file
@@ -12,40 +13,39 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET")
 
 
-# ------------------------ BEGIN FUNCTIONS ------------------------ #
-# Function to retrieve DB connection
-def get_db_connection():
-    conn = mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_DATABASE")
-    )
-    return conn
-
-# Get all items from the "items" table of the db
-def get_all_items():
-    # Create a new database connection for each request
-    conn = get_db_connection()  # Create a new database connection
-    cursor = conn.cursor() # Creates a cursor for the connection, you need this to do queries
-    # Query the db
-    query = "SELECT * FROM ingredient"
-    cursor.execute(query)
-    # Get result and close
-    result = cursor.fetchall() # Gets result from query
-    conn.close() # Close the db connection (NOTE: You should do this after each query, otherwise your database may become locked)
-    return result
-# ------------------------ END FUNCTIONS ------------------------ #
-
-
-# ------------------------ BEGIN ROUTES ------------------------ #
-# EXAMPLE OF GET REQUEST
+# Home page
 @app.route("/", methods=["GET"])
 def home():
-    items = get_all_items() # Call defined function to get all items
-    return render_template("my_personal_cookbook.html", items=items) # Return the page to be rendered
+    # TODO add check if the user is logged in and redirect them to login/register page if not
 
-# EXAMPLE OF POST REQUEST
+    pcb_entry_list = PcbDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1
+    recipe_ids = [pcb_entry.recipe_id for pcb_entry in pcb_entry_list]
+    recipe_list = []
+    for id in recipe_ids:
+        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
+        recipe_list.append(recipe)
+    return render_template("my_personal_cookbook.html", items=recipe_list) # Return the page to be rendered
+
+
+# Search Request
+@app.route("/search", methods=["GET"])
+def search():
+    # Get items from the request args in the url
+    recipe_name = request.args.get("recipe_name")
+    description = request.args.get("description")
+
+    # Render the page if there are no arguments
+    if (recipe_name is None) and (description is None):
+        return render_template('search.html')
+
+    # Make the search
+    recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description)
+
+    # Return the matching items
+    return render_template('search.html', items=recipes)
+
+
+# Example of a post request
 @app.route("/new-item", methods=["POST"])
 def add_item():
     try:
@@ -65,7 +65,6 @@ def add_item():
     except Exception as e:
         flash(f"An error occurred: {str(e)}", "error") # Send the error message to the web page
         return redirect(url_for("home")) # Redirect to home
-# ------------------------ END ROUTES ------------------------ #
 
 
 # listen on port 8080

@@ -3,19 +3,18 @@
     {% extends 'base.html' %}
 
     {% block title %}
-        Home - My Personal Cookbook
+        Home - My Website
     {% endblock %}
 
     {% block content %}
-        <html lang="en">            
+        <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>List of Favorite Recipes</title>
+            <title>List of Owned Items</title>
             <link rel="stylesheet" href="static/css/styles.css">
         </head>
         <body>
-
             <!-- Show error or success messages if there are any -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 <!-- Check to see if there are any messages to show -->
@@ -26,15 +25,29 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Code for listing entries in personal cookbook -->
-            <h2>Home - My Personal Cookbook</h2>
+            <!-- Code for adding a new item -->
+            <h2>Search for your new favorite recipe</h2>
+            <form action="/search" method="get">
+                <!-- Name -->
+                <label for="name">Recipe Name:</label>
+                <input type="text" id="recipe_name" name="recipe_name">
+                <br>
+                <!-- Quantity -->
+                <label for="quantity">Description:</label>
+                <input type="text" id="description" name="description">
+                <br>
+                <!-- Submit Button -->
+                <input type="submit" value="Search">
+            </form>
+
+            <!-- Code for listing owned items -->
+            <h2>Search Results</h2>
             <ul>
                 <!-- This is some python jinja2 code. Only existing items will be displayed. -->
                 {% for item in items %}
                     <li>{{ item.__dict__ }}</li>
                 {% endfor %}
             </ul>
-
         </body>
     {% endblock %}
 
