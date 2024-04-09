@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+    {% extends 'base.html' %}
+
+    {% block title %}
+        Recipes to Try
+    {% endblock %}
+
+    {% block content %}
+        <html lang="en">            
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>List of Favorite Recipes</title>
+            <link rel="stylesheet" href="static/css/styles.css">
+        </head>
+        <body>
+
+            <!-- Show error or success messages if there are any -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                <!-- Check to see if there are any messages to show -->
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <p class="alert {{ category }}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Code for listing entries in personal cookbook -->
+            <h2>Recipes to Try:</h2>
+            <ul>
+                <!-- This is some python jinja2 code. Only existing items will be displayed. -->
+                {% for item in items %}
+                    <li>{{ item.__dict__ }}</li>
+                {% endfor %}
+            </ul>
+
+        </body>
+    {% endblock %}
+
+</html>

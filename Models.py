@@ -24,3 +24,7 @@ class Recipe(BaseModel):
 class PcbEntry(BaseModel):
     user_id: int
     recipe_id: int
+
+class TryEntry(BaseModel):
+    user_id: int
+    recipe_id: int

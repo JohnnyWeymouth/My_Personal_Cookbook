@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from dotenv import load_dotenv
-from DAOs import RecipeDAO, PcbDAO
+from DAOs import RecipeDAO, PcbDAO, TryDAO
 from Models import Recipe
 
 
@@ -18,13 +18,25 @@ app.secret_key = os.getenv("SECRET")
 def home():
     # TODO add check if the user is logged in and redirect them to login/register page if not
 
-    pcb_entry_list = PcbDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1
+    pcb_entry_list = PcbDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1 AND Pcb stands for Personal Cook Book
     recipe_ids = [pcb_entry.recipe_id for pcb_entry in pcb_entry_list]
     recipe_list = []
     for id in recipe_ids:
         recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
         recipe_list.append(recipe)
     return render_template("my_personal_cookbook.html", items=recipe_list) # Return the page to be rendered
+
+# Try Recipe page
+@app.route("/try_recipes", methods=["GET"])
+def try_recipes():
+
+    try_entry_list = TryDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1
+    recipe_ids = [try_entry.recipe_id for try_entry in try_entry_list]
+    recipe_list = []
+    for id in recipe_ids:
+        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
+        recipe_list.append(recipe)
+    return render_template("try_recipes.html", items=recipe_list) # Return the page to be rendered
 
 
 # Search Request
