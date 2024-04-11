@@ -1,54 +1,51 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Recipe - My Website</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <!-- Show error or success messages if there are any -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        <!-- Check to see if there are any messages to show -->
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="alert {{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-    {% extends 'base.html' %}
-
-    {% block title %}
-        Home - My Website
-    {% endblock %}
-
-    {% block content %}
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>List of Owned Items</title>
-            <link rel="stylesheet" href="static/css/styles.css">
-        </head>
-        <body>
-            <!-- Show error or success messages if there are any -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                <!-- Check to see if there are any messages to show -->
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <p class="alert {{ category }}">{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <!-- Code for adding a new item -->
-            <h2>Search for your new favorite recipe</h2>
-            <form action="/search" method="get">
-                <!-- Name -->
-                <label for="name">Recipe Name:</label>
-                <input type="text" id="recipe_name" name="recipe_name">
-                <br>
-                <!-- Quantity -->
-                <label for="quantity">Description:</label>
-                <input type="text" id="description" name="description">
-                <br>
-                <!-- Submit Button -->
-                <input type="submit" value="Search">
-            </form>
-
-            <!-- Code for listing owned items -->
-            <h2>Search Results</h2>
-            <ul>
-                <!-- This is some python jinja2 code. Only existing items will be displayed. -->
-                {% for item in items %}
-                    <li>{{ item.__dict__ }}</li>
-                {% endfor %}
-            </ul>
-        </body>
-    {% endblock %}
-
+    <!-- Form for creating a new recipe -->
+    <h2>Create a New Recipe</h2>
+    <form action="/create_recipe" method="post">
+        <!-- Recipe Name -->
+        <label for="recipe_name">Recipe Name:</label>
+        <input type="text" id="recipe_name" name="recipe_name" required>
+        <br>
+        <!-- Date Created -->
+        <label for="date_created">Date Created:</label>
+        <input type="text" id="date_created" name="date_created" required>
+        <br>
+        <!-- Recipe Image -->
+        <label for="recipe_image">Recipe Image:</label>
+        <input type="text" id="recipe_image" name="recipe_image" required>
+        <br>
+        <!-- Recipe Description -->
+        <label for="recipe_description">Recipe Description:</label>
+        <input type="text" id="recipe_description" name="recipe_description" required>
+        <br>
+        <!-- Instructions -->
+        <label for="instructions">Instructions:</label>
+        <textarea id="instructions" name="instructions" required></textarea>
+        <br>
+        <!-- Tags -->
+        <label for="tags">Tags:</label>
+        <input type="text" id="tags" name="tags" required>
+        <br>
+        <!-- Submit Button -->
+        <input type="submit" value="Create Recipe">
+    </form>
+</body>
 </html>

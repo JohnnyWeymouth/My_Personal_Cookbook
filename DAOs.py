@@ -15,8 +15,31 @@ def get_db_connection():
     return conn
 
 class RecipeDAO():
-    def create_recipe(self,): # TODO
-        pass
+    def create_recipe(self, recipe_name: str, date_created: str, recipe_image: str, recipe_description: str, instructions: str, tags: str, user_id: int):
+        """Creates a new recipe in the database."""
+        
+        # Check that the arguments are strings
+        assert isinstance(recipe_name, str)
+        assert isinstance(date_created, str)
+        assert isinstance(recipe_image, str)
+        assert isinstance(recipe_description, str)
+        assert isinstance(instructions, str)
+        assert isinstance(tags, str)
+
+        # Create a new database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Create the query
+        query = "INSERT INTO recipe (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        values = (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id)
+
+        # Execute the query
+        cursor.execute(query, values)
+
+        # Commit changes and close connection
+        conn.commit()
+        conn.close()
 
     def retrieve_recipes_from_search(self, recipe_name:str, recipe_description:str) -> list[Recipe]:
         """Retrieves the recipes the matching the search tool's query.\n        
