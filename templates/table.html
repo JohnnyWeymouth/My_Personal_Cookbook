@@ -1,0 +1,48 @@
+<!-- table.html -->
+
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    /* Adjust width and overflow settings as needed */
+    td {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+<table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Instructions</th>
+        <th>Tags</th>
+        <!-- Add more headers for other values you want to display -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td><a href="/recipe?recipe_id={{ item.recipe_id }}">{{ item.recipe_name }}</a></td>
+        <td>{{ item.recipe_description }}</td>
+        <td>{{ item.instructions }}</td>
+        <td>{{ item.tags }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
