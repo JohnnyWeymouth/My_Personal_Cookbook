@@ -41,13 +41,16 @@
             </form>
 
             <!-- Code for listing owned items -->
-            <h2>Search Results</h2>
+            {% if request.args and items %}
             <ul>
                 <!-- This is some python jinja2 code. Only existing items will be displayed. -->
-                {% for item in items %}
-                    <li>{{ item.__dict__ }}</li>
-                {% endfor %}
+                {% include 'table.html' %}
             </ul>
+            {% elif request.args %}
+                <p>No search results found.</p>
+            {% else %}
+                <p>Please perform a search.</p>
+            {% endif %}
         </body>
     {% endblock %}
 
