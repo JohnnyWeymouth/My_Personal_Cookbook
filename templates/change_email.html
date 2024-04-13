@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Email</title>
+</head>
+<body>
+    <h1>Change Email</h1>
+    
+    <!-- Render flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    
+    <!-- Change email form -->
+    <form action="/change-email" method="post">
+        <label for="new_email">New Email:</label><br>
+        <input type="email" id="new_email" name="new_email" required><br>
+        <input type="submit" value="Change Email">
+    </form>
+
+    <!-- Back button -->
+    <a href="{{ url_for('me') }}">Back</a>
+</body>
+</html>

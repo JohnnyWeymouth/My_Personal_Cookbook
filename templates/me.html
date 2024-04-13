@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+    {% extends 'base.html' %}
+
+    {% block title %}
+        User page
+    {% endblock %}
+
+    {% block content %}
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Profile</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            .container {
+                max-width: 600px;
+                margin: 20px auto;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+            h1 {
+                text-align: center;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            table td, table th {
+                padding: 8px;
+                border: 1px solid #ddd;
+                text-align: left;
+            }
+            table th {
+                background-color: #f2f2f2;
+            }
+            .btn {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-right: 10px;
+            }
+            .btn:last-child {
+                margin-right: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>User Profile</h1>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Username</td>
+                    <td>{{ session['username'] }}</td>
+                    <!--<td>kkartch3</td>-->
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ session['email'] }}</td>
+                    <!--<td>kevin@kevin.com</td>-->
+                </tr>
+                <tr>
+                    <td>Recipes Added</td>
+                    <td>3</td>
+                </tr>
+                <tr>
+                    <td>Cookbook Size</td>
+                    <td>30 MB</td>
+                </tr>
+            </table>
+            <a href="{{ url_for('change_password') }}" class="btn">Change Password</a>
+            <a href="{{ url_for('change_email') }}" class="btn">Change Email</a>
+            <a href="/delete-account" class="btn" onclick="return confirm('Are you sure you want to delete your account?')">Delete Account</a>
+            {% if 'user_id' in session %}
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        {% endif %}
+        </div>
+    </body>
+    </html>
+    {% endblock %}
+
+</html>
