@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import mysql.connector
-from Models import User, Recipe, PcbEntry
+from Models import User, Recipe, PcbEntry, TryEntry
 import json
 
 from flask import Flask, render_template, request, redirect, session
@@ -165,8 +165,31 @@ class UserDAO():
 
 
 class RecipeDAO():
-    def create_recipe(self,): # TODO
-        pass
+    def create_recipe(self, recipe_name: str, date_created: str, recipe_image: str, recipe_description: str, instructions: str, tags: str, user_id: int):
+        """Creates a new recipe in the database."""
+        
+        # Check that the arguments are strings
+        assert isinstance(recipe_name, str)
+        assert isinstance(date_created, str)
+        assert isinstance(recipe_image, str)
+        assert isinstance(recipe_description, str)
+        assert isinstance(instructions, str)
+        assert isinstance(tags, str)
+
+        # Create a new database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Create the query
+        query = "INSERT INTO recipe (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        values = (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id)
+
+        # Execute the query
+        cursor.execute(query, values)
+
+        # Commit changes and close connection
+        conn.commit()
+        conn.close()
 
     def retrieve_recipes_from_search(self, recipe_name:str, recipe_description:str) -> list[Recipe]:
         """Retrieves the recipes the matching the search tool's query.\n        
@@ -279,6 +302,44 @@ class PcbDAO():
         # Convert to PersonalCookBookEntry Model Objects and return
         pcb_entries = [PcbEntry(user_id=user_id, recipe_id=recipe_id) for user_id, recipe_id in response]
         return pcb_entries
+    
+    def retrieve_recipe_from_id(self, recipe_id:int): # TODO
+        pass
+    
+    def update_recipe(self): # TODO
+        pass
+
+    def delete_recipe(self): # TODO
+        pass
+
+
+class TryDAO():
+    def create_new_entry(self): # TODO
+        pass
+
+    def retrieve_entries_by_user(self, user_id:int):
+        """Retrieves the entries for a specific user.\n
+        returns: A list of recipe_ids"""
+
+        # Check that user_id is an int
+        assert isinstance(user_id, int)
+
+        # Create a new database connection for each request
+        conn = get_db_connection()  # Create a new database connection
+        cursor = conn.cursor()  # Creates a cursor for the connection, you need this to do queries
+
+        # Create the query
+        query = "SELECT * FROM to_try_entry WHERE user_id = %s"
+        tup = (user_id,)
+        cursor.execute(query, tup)
+
+        # Get the response and close the connection
+        response = cursor.fetchall()
+        conn.close()
+
+        # Convert to PersonalCookBookEntry Model Objects and return
+        try_entries = [TryEntry(user_id=user_id, recipe_id=recipe_id) for user_id, recipe_id in response]
+        return try_entries
     
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass

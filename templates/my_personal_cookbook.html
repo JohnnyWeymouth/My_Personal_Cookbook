@@ -3,7 +3,7 @@
     {% extends 'base.html' %}
 
     {% block title %}
-        Home - My Personal Cookbook
+        Home - My Personal Cookbook - Saved Recipes
     {% endblock %}
 
     {% block content %}
@@ -30,9 +30,7 @@
             <h2>Home - My Personal Cookbook</h2>
             <ul>
                 <!-- This is some python jinja2 code. Only existing items will be displayed. -->
-                {% for item in items %}
-                    <li>{{ item.__dict__ }}</li>
-                {% endfor %}
+                {% include 'table.html' %}
             </ul>
 
         </body>

@@ -59,13 +59,25 @@ def home():
     #    return redirect('/login')
 
     #else:
-    pcb_entry_list = PcbDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1
+    pcb_entry_list = PcbDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1 AND Pcb stands for Personal Cook Book
     recipe_ids = [pcb_entry.recipe_id for pcb_entry in pcb_entry_list]
     recipe_list = []
     for id in recipe_ids:
         recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
         recipe_list.append(recipe)
     return render_template("my_personal_cookbook.html", items=recipe_list) # Return the page to be rendered
+
+# Try Recipe page
+@app.route("/try_recipes", methods=["GET"])
+def try_recipes():
+
+    try_entry_list = TryDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1
+    recipe_ids = [try_entry.recipe_id for try_entry in try_entry_list]
+    recipe_list = []
+    for id in recipe_ids:
+        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
+        recipe_list.append(recipe)
+    return render_template("try_recipes.html", items=recipe_list) # Return the page to be rendered
 
 
 # Search Request
@@ -93,6 +105,33 @@ def me():
     # Return the matching items
     return render_template('me.html')
 
+# Create Recipe Request
+@app.route("/create_recipe", methods=["GET", "POST"])
+def create_recipe():
+    # If the request method is GET, simply render the create_recipe template
+    if request.method == "GET":
+        return render_template('create_recipe.html')
+    
+    # If the request method is POST, take the data and add it to the db
+    elif request.method == "POST":
+        # Get recipe data from the form
+        data = request.form
+        recipe_name = data["recipe_name"]
+        date_created = data["date_created"]
+        recipe_image = data["recipe_image"]
+        recipe_description = data["recipe_description"]
+        instructions = data["instructions"]
+        tags = data["tags"]
+        user_id = 1  # Assuming user_id 1 for now, replace with actual user id #TODO remove hardcoding
+
+        # Insert recipe data into the database
+        RecipeDAO().create_recipe(recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id)
+
+        # Send message to page
+        flash("Recipe created successfully", "success")
+
+        # Redirect to home
+        return redirect(url_for("home"))
 
 # Example of a post request
 @app.route("/new-item", methods=["POST"])

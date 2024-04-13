@@ -3,18 +3,19 @@
     {% extends 'base.html' %}
 
     {% block title %}
-        Home - My Website
+        Recipes to Try
     {% endblock %}
 
     {% block content %}
-        <html lang="en">
+        <html lang="en">            
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>List of Owned Items</title>
+            <title>List of Favorite Recipes</title>
             <link rel="stylesheet" href="static/css/styles.css">
         </head>
         <body>
+
             <!-- Show error or success messages if there are any -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 <!-- Check to see if there are any messages to show -->
@@ -25,32 +26,13 @@
                 {% endif %}
             {% endwith %}
 
-            <!-- Code for adding a new item -->
-            <h2>Search for your new favorite recipe</h2>
-            <form action="/search" method="get">
-                <!-- Name -->
-                <label for="name">Recipe Name:</label>
-                <input type="text" id="recipe_name" name="recipe_name">
-                <br>
-                <!-- Quantity -->
-                <label for="quantity">Description:</label>
-                <input type="text" id="description" name="description">
-                <br>
-                <!-- Submit Button -->
-                <input type="submit" value="Search">
-            </form>
-
-            <!-- Code for listing owned items -->
-            {% if request.args and items %}
+            <!-- Code for listing entries in personal cookbook -->
+            <h2>Recipes to Try:</h2>
             <ul>
                 <!-- This is some python jinja2 code. Only existing items will be displayed. -->
                 {% include 'table.html' %}
             </ul>
-            {% elif request.args %}
-                <p>No search results found.</p>
-            {% else %}
-                <p>Please perform a search.</p>
-            {% endif %}
+
         </body>
     {% endblock %}
 
