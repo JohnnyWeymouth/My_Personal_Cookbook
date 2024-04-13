@@ -21,7 +21,7 @@ class RecipeDAO():
         # Check that the arguments are strings
         assert isinstance(recipe_name, str)
         assert isinstance(date_created, str)
-        assert isinstance(recipe_image, str)
+        assert isinstance(recipe_image, bytes)
         assert isinstance(recipe_description, str)
         assert isinstance(instructions, str)
         assert isinstance(tags, str)

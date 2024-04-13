@@ -27,18 +27,14 @@
 
             <!-- Form for creating a new recipe -->
             <h2>Create a New Recipe</h2>
-            <form action="/create_recipe" method="post">
+            <form action="/create_recipe" method="post" enctype="multipart/form-data">
                 <!-- Recipe Name -->
                 <label for="recipe_name">Recipe Name:</label>
                 <input type="text" id="recipe_name" name="recipe_name" required>
                 <br>
-                <!-- Date Created -->
-                <label for="date_created">Date Created:</label>
-                <input type="text" id="date_created" name="date_created" required>
-                <br>
                 <!-- Recipe Image -->
                 <label for="recipe_image">Recipe Image:</label>
-                <input type="text" id="recipe_image" name="recipe_image" required>
+                <input type="file" id="recipe_image" name="recipe_image" accept=".jpg, .jpeg, .png" required onchange="validateFileSize(this)">
                 <br>
                 <!-- Recipe Description -->
                 <label for="recipe_description">Recipe Description:</label>
@@ -55,8 +51,20 @@
                 <!-- Submit Button -->
                 <input type="submit" value="Create Recipe">
             </form>
+
+            <script>
+                function validateFileSize(inputElement) {
+                    if (inputElement.files.length > 0) {
+                        var fileSize = inputElement.files[0].size; // Size in bytes
+        
+                        // Check if file size is more than 15 MB (15 * 1024 * 1024 bytes)
+                        if (fileSize > 15728640) {
+                            alert('File size exceeds 15 MB. Please choose a smaller file.');
+                            inputElement.value = ''; // Reset the file input
+                        }
+                    }
+                }
+            </script>
         </body>
-
     {% endblock %}
-
 </html>

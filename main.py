@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from dotenv import load_dotenv
 from DAOs import RecipeDAO, PcbDAO, TryDAO
 from Models import Recipe
+from datetime import datetime
+import base64
 
 
 # Load environment variables from .env file
@@ -52,7 +54,7 @@ def search():
 
     # Make the search
     recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description)
-
+    
     # Return the matching items
     return render_template('search.html', items=recipes)
 
@@ -65,18 +67,29 @@ def create_recipe():
     
     # If the request method is POST, take the data and add it to the db
     elif request.method == "POST":
-        # Get recipe data from the form
-        data = request.form
-        recipe_name = data["recipe_name"]
-        date_created = data["date_created"]
-        recipe_image = data["recipe_image"]
-        recipe_description = data["recipe_description"]
-        instructions = data["instructions"]
-        tags = data["tags"]
-        user_id = 1  # Assuming user_id 1 for now, replace with actual user id #TODO remove hardcoding
+        # Get image bytes
+        recipe_image = request.files["recipe_image"]
+        try:
+            image_blob = recipe_image.read()
+            if len(image_blob) > 15.5 * 1024 * 1024: raise ValueError("Image size exceeds 16 MB")
+        except:
+            image_blob = None
+
+        # Get the tags
+        tags = request.form["tags"]
+
+        user_id = 1 # TODO remove hardcoding
 
         # Insert recipe data into the database
-        RecipeDAO().create_recipe(recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id)
+        RecipeDAO().create_recipe(
+            request.form["recipe_name"],
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            image_blob,
+            request.form["recipe_description"],
+            request.form["instructions"],
+            tags,
+            user_id
+        )
 
         # Send message to page
         flash("Recipe created successfully", "success")

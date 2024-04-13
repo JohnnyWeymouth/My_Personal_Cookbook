@@ -41,7 +41,7 @@ CREATE TABLE recipe (
   recipe_id SERIAL,
   recipe_name VARCHAR (255) NOT NULL,
   date_created DATE NOT NULL,
-  recipe_image BLOB,
+  recipe_image MEDIUMBLOB,
   recipe_description VARCHAR (3000) NOT NULL,
   instructions VARCHAR (3000) NOT NULL,
   tags JSON NOT NULL,
