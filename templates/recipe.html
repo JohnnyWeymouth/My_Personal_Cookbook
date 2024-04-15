@@ -1,0 +1,28 @@
+<!-- recipe.html -->
+
+<html>
+    {% extends 'base.html' %}
+
+    {% block title %}
+        Home - My Website
+    {% endblock %}
+
+    {% block content %}
+<head>
+    <title>{{ recipe.recipe_name }}</title>
+</head>
+<body>
+    <h1>{{ recipe.recipe_name }}</h1>
+    <p><strong>Description:</strong> {{ recipe.recipe_description }}</p>
+    <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
+    <p><strong>Tags:</strong> {{ ' '.join(recipe.tags) }}</p>
+    <div>
+        {% if recipe.recipe_image %}
+            <img src="data:image;base64,{{ recipe.recipe_image }}" alt="{{ recipe.recipe_name }}" style="width: calc(20vh); height: calc(20vh);">
+        {% else %}
+            <p>No image available</p>
+        {% endif %}
+    </div>
+</body>
+    {% endblock %}
+</html>

@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
-from DAOs import RecipeDAO, PcbDAO, UserDAO
+from DAOs import RecipeDAO, PcbDAO, UserDAO, TryDAO
 from Models import Recipe
 from datetime import datetime
 import base64
@@ -68,6 +68,20 @@ def home():
         recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
         recipe_list.append(recipe)
     return render_template("my_personal_cookbook.html", items=recipe_list) # Return the page to be rendered
+
+# Recipe page that can dynamically display different recipes
+@app.route('/recipe')
+def recipe_page():
+    recipe_id = request.args.get('recipe_id', type=int)
+    if recipe_id:
+        dao = RecipeDAO()
+        recipe = dao.retrieve_recipe_by_id(recipe_id)
+        if recipe:
+            return render_template('recipe.html', recipe=recipe)
+        else:
+            return "Recipe not found", 404
+    else:
+        return "Invalid recipe ID", 400
 
 # Try Recipe page
 @app.route("/try_recipes", methods=["GET"])
