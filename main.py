@@ -13,40 +13,6 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET')
 
-# Login Page
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    # Get Request
-    if request.method == 'GET':
-        return render_template('login.html')
-
-    # Post Request
-    if request.method == 'POST':
-        # Get the request data
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        # Validate the request data
-        if not all(isinstance(var, str) for var in [username, password]):
-            flash('Bad request', 'error')
-            return redirect('/login')
-        
-        # Check if username/email and password are valid
-        user = UserDAO().authenticate_user(username, password)
-        
-        if user:
-            # Store user ID and email in session
-            # TODO store the rest of the variables too later!
-            session['user_id'] = user.user_id
-            session['email'] = user.user_email
-            session['username'] = user.username
-            
-            # Redirect to user profile page
-            return redirect('/me')
-        else:
-            error_message = 'Invalid username/email or password'
-            return render_template('login.html', error_message=error_message)
-
 # Custom decorator to check if the user is logged in
 def login_required(f):
     @wraps(f)
@@ -194,6 +160,40 @@ def create_recipe():
 
         # Redirect to home
         return redirect(url_for('home'))
+    
+# Login Page
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # Get Request
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    # Post Request
+    if request.method == 'POST':
+        # Get the request data
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        # Validate the request data
+        if not all(isinstance(var, str) for var in [username, password]):
+            flash('Bad request', 'error')
+            return redirect('/login')
+        
+        # Check if username/email and password are valid
+        user = UserDAO().authenticate_user(username, password)
+        
+        if user:
+            # Store user ID and email in session
+            # TODO store the rest of the variables too later!
+            session['user_id'] = user.user_id
+            session['email'] = user.user_email
+            session['username'] = user.username
+            
+            # Redirect to user profile page
+            return redirect('/me')
+        else:
+            error_message = 'Invalid username/email or password'
+            return render_template('login.html', error_message=error_message)
 
 @app.route('/logout')
 @login_required
