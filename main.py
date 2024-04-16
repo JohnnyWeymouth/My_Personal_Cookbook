@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
-from DAOs import RecipeDAO, PcbDAO, UserDAO
+from DAOs import RecipeDAO, PcbDAO, UserDAO, TryDAO
 from Models import Recipe
 from datetime import datetime
 import base64
