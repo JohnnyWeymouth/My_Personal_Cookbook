@@ -189,28 +189,6 @@ def create_recipe():
         # Redirect to home
         return redirect(url_for("home"))
 
-# Example of a post request
-@app.route("/new-item", methods=["POST"])
-@login_required
-def add_item():
-    try:
-        # Get items from the form
-        data = request.form
-        item_name = data["name"] # This is defined in the input element of the HTML form on index.html
-        item_quantity = data["quantity"] # This is defined in the input element of the HTML form on index.html
-
-        # TODO: Insert this data into the database
-        
-        # Send message to page. There is code in index.html that checks for these messages
-        flash("Item added successfully", "success")
-        # Redirect to home. This works because the home route is named home in this file
-        return redirect(url_for("home"))
-
-    # If an error occurs, this code block will be called
-    except Exception as e:
-        flash(f"An error occurred: {str(e)}", "error") # Send the error message to the web page
-        return redirect(url_for("home")) # Redirect to home
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -221,66 +199,74 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    # Get Request
+    if request.method == 'GET':
+        return render_template('register.html')
+
+    # Post Request
     if request.method == 'POST':
         # Get registration form data
-        username = request.form['username']
-        email = request.form['email']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        password = request.form['password']
-        
-        # Check if username or email already exists in the database
-        if user_dao.is_username_taken(username):
-            flash('Username already taken', 'error')
-            return redirect('/register')
-        if user_dao.is_email_taken(email):
-            flash('Email already registered', 'error')
+        username = request.form.get('username')
+        email = request.form.get('email')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        password = request.form.get('password')
+
+        # Check if any variable is not a string
+        if not all(isinstance(var, str) for var in [username, email, first_name, last_name, password]):
+            flash('Bad request', 'error')
             return redirect('/register')
 
-        # If username and email are available, create a new user
+        # Try to register
         user_id = user_dao.create_user(username, email, first_name, last_name, password)
-        if user_id:
-            # Store the username in the session
-            session['username'] = username
-            flash('Account created successfully', 'success')
-            return redirect('/login')
-        else:
+
+        # If the registration failed, add an error message
+        if not user_id:
             flash('Failed to create account', 'error')
             return redirect('/register')
-    else:
-        return render_template('register.html')
+
+        # Store the username in the session
+        session['username'] = username
+        flash('Account created successfully', 'success')
+        return redirect('/login')
     
 # Add the route to handle account deletion
 @app.route('/delete-account', methods=['GET', 'POST'])
 @login_required
 def delete_account():
+    # Get Request
+    if request.method == 'GET':
+        return render_template('delete_account.html')
+    
+    # Post Request
     if request.method == 'POST':
         # Get the user_id from the session
         user_id = session.get('user_id')
 
-        # Call the delete_user function
-        if user_id:
-            if user_dao.delete_user(user_id):
-                # Clear the session after successful deletion
-                session.clear()
-                # Redirect to the home page or a suitable page
-                return redirect('/')
-            else:
-                # Handle deletion failure
-                flash('Failed to delete account', 'error')
-                return redirect('/me')
-        else:
-            # Handle case when user is not logged in
+        # Handle case when user is not logged in
+        if not user_id:
             flash('User not logged in', 'error')
             return redirect('/login')
-    else:
-        # Render the delete account confirmation page
-        return render_template('delete_account.html')
+
+        # Try to delete the user
+        if user_dao.delete_user(user_id):
+            # Clear the session and go to home
+            session.clear()
+            return redirect('/')
+        else:
+            # Handle deletion failure
+            flash('Failed to delete account', 'error')
+            return redirect('/me')
     
 # Functionality to Change the email
 @app.route("/change-email", methods=["GET", "POST"])
 @login_required
 def change_email():
+    # Get Request
+    if request.method == 'GET':
+        return render_template("change_email.html")
+    
+    # Post Request
     if request.method == "POST":
         new_email = request.form.get("new_email")
 
@@ -289,25 +275,24 @@ def change_email():
         user_id = session["user_id"]
         success = user_dao.update_email(user_id, new_email)
 
+        # Try to update the session variable with the new email
         if success:
-            # Update the session variable with the new email
             session["email"] = new_email
-
             flash("Email updated successfully", "success")
         else:
             flash("Failed to update email", "error")
-
-    return render_template("change_email.html")
-
-
-
-
 
 # Functionality to Change the password
 @app.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
+    # Get Request
+    if request.method == 'GET':
+        return render_template("change_password.html")
+    
+    # Post Request
     if request.method == "POST":
+        # Pull the username and password from the form
         current_password = request.form.get("current_password")
         new_password = request.form.get("new_password")
 
@@ -316,23 +301,17 @@ def change_password():
         user_id = session["user_id"]
         user = user_dao.authenticate_user(session["username"], current_password)
 
-        if user:
-            # Update the user's password
-            success = user_dao.update_password(user_id, new_password)
-
-            if success:
-                flash("Password updated successfully", "success")
-            else:
-                flash("Failed to update password", "error")
-        else:
+        # If the user is not logged in, continue
+        if not user:
             flash("Incorrect current password", "error")
-
-    return render_template("change_password.html")
-
-
-
-
-
+            return render_template("change_password.html")
+        
+        # Try to update the user password
+        success = user_dao.update_password(user_id, new_password)
+        if success:
+            flash("Password updated successfully", "success")
+        else:
+            flash("Failed to update password", "error")
 
 # listen on port 8080
 if __name__ == "__main__":

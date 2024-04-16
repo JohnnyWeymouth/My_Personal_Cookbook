@@ -4,8 +4,6 @@ import mysql.connector
 from Models import User, Recipe, PcbEntry, TryEntry
 import json
 
-from flask import Flask, render_template, request, redirect, session
-
 def get_db_connection():
     load_dotenv()
     conn = mysql.connector.connect(
@@ -43,22 +41,26 @@ class UserDAO():
                 return None
     
     def is_username_taken(self, username):
+        # Establish the connection
         conn = get_db_connection()
         cursor = conn.cursor()
         
         # Query to check if the username exists in the database
         query = "SELECT COUNT(*) FROM user WHERE username = %s"
-        cursor.execute(query, (username,))
+        tup = (username,)
+        cursor.execute(query, tup)
         
         # Fetch the result
         count = cursor.fetchone()[0]
         
+        # Close the connection
         conn.close()
         
         # If count is greater than 0, username is taken
         return count > 0
     
     def is_email_taken(self, email):
+        # Establish the connection
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -75,13 +77,21 @@ class UserDAO():
         return count > 0
     
     def create_user(self, username, email, first_name, last_name, password):
+        # Establish the connection
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # Check if username or email already exists in the database
+        if self.is_username_taken(username):
+            return None
+        if self.is_email_taken(email):
+            return None
         
         try:
             # Insert the new user into the database
             query = "INSERT INTO user (username, user_email, first_name, last_name, password_hash, date_joined) VALUES (%s, %s, %s, %s, %s, NOW())"
-            cursor.execute(query, (username, email, first_name, last_name, password))
+            tup = (username, email, first_name, last_name, password)
+            cursor.execute(query, tup)
             
             # Commit the transaction
             conn.commit()
@@ -100,10 +110,12 @@ class UserDAO():
             raise e
         
     def delete_user(self, user_id):
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
+        # Establish the database connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
+        # Try to delete the user
+        try:
             # SQL query to delete the user
             query = "DELETE FROM user WHERE user_id = %s"
             cursor.execute(query, (user_id,))
@@ -111,16 +123,22 @@ class UserDAO():
             # Commit the transaction
             conn.commit()
 
-            # Close the cursor and connection
-            cursor.close()
-            conn.close()
+            # Return True only after a successful commit
+            return True
 
-            return True  # Return True if deletion was successful
-
+        # Handle exceptions
         except Exception as e:
-            # Handle any errors
             print(f"Error deleting user: {str(e)}")
-            return False  # Return False if deletion failed
+            conn.rollback()  # Rollback the transaction
+            return False
+
+        # Close the cursor and connection
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+
 
     def update_email(self, user_id, new_email):
         try:
