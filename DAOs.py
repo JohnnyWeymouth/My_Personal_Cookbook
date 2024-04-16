@@ -303,6 +303,29 @@ class PcbDAO():
         pcb_entries = [PcbEntry(user_id=user_id, recipe_id=recipe_id) for user_id, recipe_id in response]
         return pcb_entries
     
+    def add_new_entry(self, user_id, recipe_id):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor(buffered=True)  # Use a buffered cursor
+
+            # Check if the entry already exists
+            query = "SELECT COUNT(*) FROM personal_cookbook_entry WHERE user_id = %s AND recipe_id = %s"
+            cursor.execute(query, (user_id, recipe_id))
+            count = cursor.fetchone()[0]
+
+            if count == 0:
+                # Insert the entry if it does not exist
+                query = "INSERT INTO personal_cookbook_entry (user_id, recipe_id) VALUES (%s, %s)"
+                cursor.execute(query, (user_id, recipe_id))
+
+            cursor.close()  # Close the cursor to handle any potential unread results
+            conn.commit()  # Now commit the transaction
+            return count == 0  # Returns True if the entry was added, False if it was not
+        finally:
+            conn.close()  # Ensure the connection is closed in case of error
+
+
+    
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass
     
@@ -341,6 +364,29 @@ class TryDAO():
         try_entries = [TryEntry(user_id=user_id, recipe_id=recipe_id) for user_id, recipe_id in response]
         return try_entries
     
+    def add_new_entry(self, user_id, recipe_id):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor(buffered=True)  # Use a buffered cursor
+
+            # Check if the entry already exists
+            query = "SELECT COUNT(*) FROM to_try_entry WHERE user_id = %s AND recipe_id = %s"
+            cursor.execute(query, (user_id, recipe_id))
+            count = cursor.fetchone()[0]
+
+            if count == 0:
+                # Insert the entry if it does not exist
+                query = "INSERT INTO to_try_entry (user_id, recipe_id) VALUES (%s, %s)"
+                cursor.execute(query, (user_id, recipe_id))
+
+            cursor.close()  # Close the cursor to handle any potential unread results
+            conn.commit()  # Now commit the transaction
+            return count == 0  # Returns True if the entry was added, False if it was not
+        finally:
+            conn.close()  # Ensure the connection is closed in case of error
+
+
+
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass
     

@@ -23,6 +23,22 @@
             <p>No image available</p>
         {% endif %}
     </div>
+        <!-- Forms to add to personal cookbook or to try list -->
+        <form action="/add_to_personal_cookbook" method="post">
+            <input type="hidden" name="recipe_id" value="{{ recipe.recipe_id }}">
+            <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
+            <button type="submit">Add to My Cookbook</button>
+        </form>
+    
+        <form action="/add_to_try_list" method="post">
+            <input type="hidden" name="recipe_id" value="{{ recipe.recipe_id }}">
+            <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
+            <button type="submit">Add to Try List</button>
+        </form>
+    
+        <button onclick="window.history.back();">Go Back</button>
+    </body>
+    </html>
     <button onclick="window.history.back();">Go Back</button>
 </body>
     {% endblock %}
