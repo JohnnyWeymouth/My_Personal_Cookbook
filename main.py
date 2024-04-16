@@ -69,6 +69,49 @@ def home():
         recipe_list.append(recipe)
     return render_template("my_personal_cookbook.html", items=recipe_list) # Return the page to be rendered
 
+# Recipe page that can dynamically display different recipes
+@app.route('/recipe')
+def recipe_page():
+    recipe_id = request.args.get('recipe_id', type=int)
+    if recipe_id:
+        dao = RecipeDAO()
+        recipe = dao.retrieve_recipe_by_id(recipe_id)
+        if recipe:
+            return render_template('recipe.html', recipe=recipe)
+        else:
+            return "Recipe not found", 404
+    else:
+        return "Invalid recipe ID", 400
+    
+# Routes to add recipe to either cookbook or to try list
+@app.route('/add_to_personal_cookbook', methods=['POST'])
+def add_to_personal_cookbook():
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = request.form.get('user_id', type=int)
+    if recipe_id and user_id:
+        dao = PcbDAO()
+        if dao.add_new_entry(user_id, recipe_id):
+            flash('Recipe added to your cookbook.')
+        else:
+            flash('Recipe already in your cookbook.')
+        return redirect('/')
+    else:
+        return "Invalid input", 400
+
+@app.route('/add_to_try_list', methods=['POST'])
+def add_to_try_list():
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = request.form.get('user_id', type=int)
+    if recipe_id and user_id:
+        dao = TryDAO()
+        if dao.add_new_entry(user_id, recipe_id):
+            flash('Recipe added to your try list.')
+        else:
+            flash('Recipe already in your try list.')
+        return redirect('/try_recipes')
+    else:
+        return "Invalid input", 400
+
 # Try Recipe page
 @app.route("/try_recipes", methods=["GET"])
 def try_recipes():
