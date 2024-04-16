@@ -17,13 +17,12 @@ def get_db_connection():
 #testing User Authentication
 class UserDAO():
     def authenticate_user(self, username, password):
-        conn = get_db_connection()  # Create a new database connection
-        cursor = conn.cursor()  # Creates a cursor for the connection, you need this to do queries
+        # Establish the connection
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-        with cursor:
-            query = """
-                SELECT * FROM user WHERE (username = %s OR user_email = %s) AND password_hash = %s
-            """
+        try:
+            query = "SELECT * FROM user WHERE (username = %s OR user_email = %s) AND password_hash = %s"
             cursor.execute(query, (username, username, password))
             user_data = cursor.fetchone()
             if user_data:
@@ -39,6 +38,11 @@ class UserDAO():
                 return user
             else:
                 return None
+            
+        except Exception as e:
+            # Rollback the transaction if an error occurs
+            conn.rollback()
+            raise e
     
     def is_username_taken(self, username):
         # Establish the connection
@@ -59,7 +63,11 @@ class UserDAO():
         # If count is greater than 0, username is taken
         return count > 0
     
-    def is_email_taken(self, email):
+    def is_email_taken(self, email:str):
+        # Validate the args
+        if not isinstance(email, str):
+            return False
+
         # Establish the connection
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -76,16 +84,14 @@ class UserDAO():
         # If count is greater than 0, email is taken
         return count > 0
     
-    def create_user(self, username, email, first_name, last_name, password):
+    def create_user(self, username:str, email:str, first_name:str, last_name:str, password:str):
         # Establish the connection
         conn = get_db_connection()
         cursor = conn.cursor()
 
         # Check if username or email already exists in the database
-        if self.is_username_taken(username):
-            return None
-        if self.is_email_taken(email):
-            return None
+        if (self.is_username_taken(username)) or (self.is_email_taken(email)):
+            return None 
         
         try:
             # Insert the new user into the database
