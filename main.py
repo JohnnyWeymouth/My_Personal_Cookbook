@@ -25,7 +25,7 @@ def login_required(f):
 
 # Home page
 @app.route('/', methods=['GET'])
-@login_required # TODO switch to using cookie instead of user id
+@login_required
 def home():
     # Access the Personal Cookbook entries that match the user_id
     pcb_entry_list = PcbDAO().retrieve_entries_by_user(session['user_id'])
@@ -45,7 +45,7 @@ def home():
     # Render the page with all the recipes
     return render_template('my_personal_cookbook.html', items=items)
 
-# Try Recipe page TODO switch to use cookie to get user_id
+# Try Recipe page
 @app.route('/try_recipes', methods=['GET'])
 def try_recipes():
     # Access the Try entries that match the user_id
@@ -76,7 +76,9 @@ def search():
     tags = request.args.getlist('tags')  # Gets all selected tags
 
     # Handle the case where the form is submitted without any criteria
-    if not any([recipe_name, description, tags]):
+    if not any([isinstance(recipe_name, str) or recipe_name is None,
+                isinstance(description, str) or description is None,
+                isinstance(tags, list) or tags is None]):
         flash('Please enter search criteria.', 'error')
         return render_template('search.html')
 
@@ -99,14 +101,16 @@ def search():
 def recipe_page():
     recipe_id = request.args.get('recipe_id', type=int)
     if recipe_id:
-        dao = RecipeDAO()
-        recipe = dao.retrieve_recipe_by_id(recipe_id)
+        recipe = RecipeDAO().retrieve_recipe_by_id(recipe_id)
         if recipe:
-            return render_template('recipe.html', recipe=recipe)
+            saved_try = TryDAO().check_if_saved_recipe(user_id=session['user_id'], recipe_id=recipe.recipe_id)
+            saved_cb = PcbDAO().check_if_saved_recipe(user_id=session['user_id'], recipe_id=recipe.recipe_id)
+            tup = (recipe, saved_try, saved_cb)
+            return render_template('recipe.html', item=tup)
         else:
             return 'Recipe not found', 404
     else:
-        return 'Invalid recipe ID', 400
+        return 'No recipe ID', 400
     
 # Routes to add recipe to either cookbook or to try list
 @app.route('/add_to_personal_cookbook', methods=['POST'])
@@ -206,7 +210,8 @@ def me():
 def create_recipe():
     if request.method == 'GET':
         return render_template('create_recipe.html')
-    elif request.method == 'POST':
+    
+    if request.method == 'POST':
         # Get image bytes
         recipe_image = request.files['recipe_image']
         try:
@@ -232,14 +237,16 @@ def create_recipe():
             session['user_id']
         )
 
-        # TODO add this to that users personal cookbook
-        # PcbDAO().add_new_entry(user_id=session['user_id'], recipe_id=recipe_id)
+        print(recipe_id)
+
+        # Add this to that users personal cookbook
+        PcbDAO().add_new_entry(user_id=session['user_id'], recipe_id=recipe_id)
 
         # Send message to page
         flash('Recipe created successfully', 'success')
 
         # Redirect to home
-        return redirect(url_for('home'))
+        return redirect(f'/recipe?recipe_id={recipe_id}')
     
 # Login Page
 @app.route('/login', methods=['GET', 'POST'])
@@ -264,7 +271,6 @@ def login():
         
         if user:
             # Store user ID and email in session
-            # TODO store the rest of the variables too later!
             session['user_id'] = user.user_id
             session['email'] = user.user_email
             session['username'] = user.username
@@ -316,7 +322,7 @@ def register():
         flash('Account created successfully', 'success')
         return redirect('/me')
     
-# Delete Account Page TODO change to authenticate user with their password as well
+# Delete Account Page
 @app.route('/delete-account', methods=['GET', 'POST'])
 @login_required
 def delete_account():
@@ -339,7 +345,7 @@ def delete_account():
             flash('Failed to delete account', 'error')
             return redirect('/me')
     
-# Change Email Page TODO change to use cookie instead of user_id
+# Change Email Page
 @app.route('/change-email', methods=['GET', 'POST'])
 @login_required
 def change_email():
@@ -369,7 +375,7 @@ def change_email():
         # Redirect to the me page
         return render_template('me.html')
 
-# Change Password Page TODO change to use cookie instead of user_id
+# Change Password Page
 @app.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
