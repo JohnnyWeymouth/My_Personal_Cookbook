@@ -215,35 +215,33 @@ class RecipeDAO():
         conn.commit()
         conn.close()
 
-    def retrieve_recipes_from_search(self, recipe_name:str, recipe_description:str) -> list[Recipe]:
-        """Retrieves the recipes the matching the search tool's query.\n        
+    def retrieve_recipes_from_search(self, recipe_name: str, recipe_description: str, tags: list) -> list:
+        """Retrieves recipes matching the search criteria including tags.\n        
         returns: A list of recipes"""
 
-        # Check that the search arguments are strings
-        assert isinstance(recipe_name, str)
-        assert isinstance(recipe_description, str)
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-        # Create a new database connection for each request
-        conn = get_db_connection()  # Create a new database connection
-        cursor = conn.cursor()  # Creates a cursor for the connection, you need this to do queries
+        # Start building the query dynamically based on provided inputs
+        query = "SELECT * FROM recipe WHERE 1=1"
+        params = []
 
-        # Create the query # TODO incorporate tags and make this less messy
-        if recipe_description == '':
-            query = "SELECT * FROM recipe WHERE recipe_name LIKE %s"
-            tup = ('%' + recipe_name + '%',)
-            cursor.execute(query, tup)
-        elif recipe_name == '':
-            query = "SELECT * FROM recipe WHERE recipe_description LIKE %s"
-            tup = ('%' + recipe_description + '%',)
-            cursor.execute(query, tup)
-        elif (recipe_name == '') and (recipe_description == ''):
-            cursor.execute("SELECT * FROM recipe where 1 = 0")
-        else:
-            query = "SELECT * FROM recipe WHERE recipe_name LIKE %s OR recipe_description LIKE %s"
-            tup = ('%' + recipe_name + '%', '%' + recipe_description + '%')
-            cursor.execute(query, tup)
+        if recipe_name:
+            query += " AND recipe_name LIKE %s"
+            params.append('%' + recipe_name + '%')
 
-        # Get the response and close the connection
+        if recipe_description:
+            query += " AND recipe_description LIKE %s"
+            params.append('%' + recipe_description + '%')
+
+        if tags:
+            # Adjust the following based on your database's capabilities to handle JSON
+            # For MySQL, use JSON_CONTAINS or similar
+            # For PostgreSQL, use the containment operator @> for JSONB fields
+            tag_conditions = " OR ".join(["JSON_CONTAINS(tags, '\"%s\"')" % tag for tag in tags])
+            query += " AND (" + tag_conditions + ")"
+
+        cursor.execute(query, params)
         response = cursor.fetchall()
         conn.close()
 
@@ -348,15 +346,25 @@ class PcbDAO():
         finally:
             conn.close()  # Ensure the connection is closed in case of error
 
-
+    def delete_recipe(self, user_id, recipe_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            query = "DELETE FROM personal_cookbook_entry WHERE user_id = %s AND recipe_id = %s"
+            cursor.execute(query, (user_id, recipe_id))
+            conn.commit()
+            return cursor.rowcount > 0  # Returns True if rows were affected
+        except Exception as e:
+            print(f"Failed to delete recipe: {e}")
+            return False
+        finally:
+            cursor.close()
+            conn.close()
     
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass
     
     def update_recipe(self): # TODO
-        pass
-
-    def delete_recipe(self): # TODO
         pass
 
 
@@ -409,13 +417,23 @@ class TryDAO():
         finally:
             conn.close()  # Ensure the connection is closed in case of error
 
-
+    def delete_recipe(self, user_id, recipe_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            query = "DELETE FROM to_try_entry WHERE user_id = %s AND recipe_id = %s"
+            cursor.execute(query, (user_id, recipe_id))
+            conn.commit()
+            return cursor.rowcount > 0  # Returns True if rows were affected
+        except Exception as e:
+            print(f"Failed to delete recipe: {e}")
+            return False
+        finally:
+            cursor.close()
+            conn.close()
 
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass
     
     def update_recipe(self): # TODO
-        pass
-
-    def delete_recipe(self): # TODO
         pass

@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
 from DAOs import RecipeDAO, PcbDAO, UserDAO, TryDAO
@@ -101,21 +102,50 @@ def add_to_try_list():
         return redirect('/try_recipes')
     else:
         return 'Invalid input', 400
+    
+# Route to remove a recipe from the cookbooks    
+@app.route('/remove_recipe', methods=['POST'])
+def remove_recipe():
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = session.get('user_id')  # Corrected session access
+    referer = request.headers.get('Referer')
+
+    if user_id is None:
+        flash('User not logged in.')
+        return redirect('/login')  # Redirect to login page if user_id is not found
+
+    pcb_dao = PcbDAO()
+    try_dao = TryDAO()
+
+    removed_from_pcb = pcb_dao.delete_recipe(user_id, recipe_id)
+    removed_from_try = try_dao.delete_recipe(user_id, recipe_id)
+
+    if removed_from_pcb or removed_from_try:
+        flash('Recipe removed from list.')
+    else:
+        flash('Error removing recipe from lists.')
+
+    if referer:
+        return redirect(referer)
+    else:
+        return redirect('/my_personal_cookbook')  # Redirect back to the table page
 
 # Search Request
 @app.route('/search', methods=['GET'])
 @login_required
 def search():
-    # Get items from the request args in the url
-    recipe_name = request.args.get('recipe_name')
-    description = request.args.get('description')
+    # Get items from the request args in the URL
+    recipe_name = request.args.get('recipe_name', '')
+    description = request.args.get('description', '')
+    tags = request.args.getlist('tags')  # Gets all selected tags
 
-    # Render the page if there are no arguments
-    if (recipe_name is None) and (description is None):
+    # Handle the case where the form is submitted without any criteria
+    if not any([recipe_name, description, tags]):
+        flash('Please enter search criteria.')
         return render_template('search.html')
 
     # Make the search
-    recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description)
+    recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description, tags)
     
     # Return the matching items
     return render_template('search.html', items=recipes)
@@ -127,26 +157,25 @@ def me():
     # Return the matching items
     return render_template('me.html')
 
-# Create Recipe Request
 @app.route('/create_recipe', methods=['GET', 'POST'])
 @login_required
 def create_recipe():
-    # If the request method is GET, simply render the create_recipe template
     if request.method == 'GET':
         return render_template('create_recipe.html')
-    
-    # If the request method is POST, take the data and add it to the db
     elif request.method == 'POST':
         # Get image bytes
         recipe_image = request.files['recipe_image']
         try:
             image_blob = recipe_image.read()
-            if len(image_blob) > 15.5 * 1024 * 1024: raise ValueError('Image size exceeds 16 MB')
-        except:
+            if len(image_blob) > 15.5 * 1024 * 1024:  # 16MB Limit
+                raise ValueError('Image size exceeds 16 MB')
+        except Exception as e:
+            flash(f'Error with image upload: {str(e)}', 'error')
             image_blob = None
 
-        # Get the tags
-        tags = request.form['tags']
+        # Handle tags
+        tags = request.form.getlist('tags')  # Gets a list of checked tags
+        tags_json = json.dumps(tags)  # Converts list to JSON string
 
         # Insert recipe data into the database
         recipe_id = RecipeDAO().create_recipe(
@@ -155,7 +184,7 @@ def create_recipe():
             image_blob,
             request.form['recipe_description'],
             request.form['instructions'],
-            tags,
+            tags_json,
             session['user_id']
         )
 
