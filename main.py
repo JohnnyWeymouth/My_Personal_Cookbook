@@ -29,7 +29,7 @@ def home():
     # Access the Personal Cookbook entries that match the user_id
     pcb_entry_list = PcbDAO().retrieve_entries_by_user(session['user_id'])
 
-    # Access each recipe_id for every Personal Cookbook Entry  
+    # Access each recipe_id for every Personal Cookbook Entry
     recipe_ids = [pcb_entry.recipe_id for pcb_entry in pcb_entry_list]
 
     # Access each recipe for every recipe_id
@@ -40,6 +40,24 @@ def home():
 
     # Render the page with all the recipes
     return render_template('my_personal_cookbook.html', items=recipe_list)
+
+# Try Recipe page TODO switch to use cookie to get user_id
+@app.route('/try_recipes', methods=['GET'])
+def try_recipes():
+    # Access the Try entries that match the user_id
+    try_entry_list = TryDAO().retrieve_entries_by_user(session['user_id'])
+
+    # Access each recipe_id for every Personal Cookbook Entry
+    recipe_ids = [try_entry.recipe_id for try_entry in try_entry_list]
+
+    # Access each recipe for every recipe_id
+    recipe_list = []
+    for id in recipe_ids:
+        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
+        recipe_list.append(recipe)
+
+    # Render the page with all the recipes
+    return render_template('try_recipes.html', items=recipe_list)
 
 # Recipe page that can dynamically display different recipes
 @app.route('/recipe')
@@ -84,19 +102,6 @@ def add_to_try_list():
     else:
         return 'Invalid input', 400
 
-# Try Recipe page
-@app.route('/try_recipes', methods=['GET'])
-def try_recipes():
-
-    try_entry_list = TryDAO().retrieve_entries_by_user(1) # TODO Remove the hardcoded user id of 1
-    recipe_ids = [try_entry.recipe_id for try_entry in try_entry_list]
-    recipe_list = []
-    for id in recipe_ids:
-        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
-        recipe_list.append(recipe)
-    return render_template('try_recipes.html', items=recipe_list) # Return the page to be rendered
-
-
 # Search Request
 @app.route('/search', methods=['GET'])
 @login_required
@@ -124,6 +129,7 @@ def me():
 
 # Create Recipe Request
 @app.route('/create_recipe', methods=['GET', 'POST'])
+@login_required
 def create_recipe():
     # If the request method is GET, simply render the create_recipe template
     if request.method == 'GET':
@@ -142,18 +148,19 @@ def create_recipe():
         # Get the tags
         tags = request.form['tags']
 
-        user_id = 1 # TODO remove hardcoding
-
         # Insert recipe data into the database
-        RecipeDAO().create_recipe(
+        recipe_id = RecipeDAO().create_recipe(
             request.form['recipe_name'],
             datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             image_blob,
             request.form['recipe_description'],
             request.form['instructions'],
             tags,
-            user_id
+            session['user_id']
         )
+
+        # TODO add this to that users personal cookbook
+        # PcbDAO().add_new_entry(user_id=session['user_id'], recipe_id=)
 
         # Send message to page
         flash('Recipe created successfully', 'success')

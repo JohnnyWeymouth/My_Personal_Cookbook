@@ -11,5 +11,7 @@ Validate tag json - Koby
 
 Remove hardcoding in me page and in try page - Johnny
 Implement Cookies - Johnny
+Clean DAOs - Johnny
+Clean Main - Johnny
 
 Fix Favicon - Sione
