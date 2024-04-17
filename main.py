@@ -83,6 +83,33 @@ def add_to_try_list():
         return redirect('/try_recipes')
     else:
         return 'Invalid input', 400
+    
+# Route to remove a recipe from the cookbooks    
+@app.route('/remove_recipe', methods=['POST'])
+def remove_recipe():
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = session.get('user_id')  # Corrected session access
+    referer = request.headers.get('Referer')
+
+    if user_id is None:
+        flash('User not logged in.')
+        return redirect('/login')  # Redirect to login page if user_id is not found
+
+    pcb_dao = PcbDAO()
+    try_dao = TryDAO()
+
+    removed_from_pcb = pcb_dao.delete_recipe(user_id, recipe_id)
+    removed_from_try = try_dao.delete_recipe(user_id, recipe_id)
+
+    if removed_from_pcb or removed_from_try:
+        flash('Recipe removed from list.')
+    else:
+        flash('Error removing recipe from lists.')
+
+    if referer:
+        return redirect(referer)
+    else:
+        return redirect('/my_personal_cookbook')  # Redirect back to the table page
 
 # Try Recipe page
 @app.route('/try_recipes', methods=['GET'])

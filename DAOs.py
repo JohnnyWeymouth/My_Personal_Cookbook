@@ -348,15 +348,25 @@ class PcbDAO():
         finally:
             conn.close()  # Ensure the connection is closed in case of error
 
-
+    def delete_recipe(self, user_id, recipe_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            query = "DELETE FROM personal_cookbook_entry WHERE user_id = %s AND recipe_id = %s"
+            cursor.execute(query, (user_id, recipe_id))
+            conn.commit()
+            return cursor.rowcount > 0  # Returns True if rows were affected
+        except Exception as e:
+            print(f"Failed to delete recipe: {e}")
+            return False
+        finally:
+            cursor.close()
+            conn.close()
     
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass
     
     def update_recipe(self): # TODO
-        pass
-
-    def delete_recipe(self): # TODO
         pass
 
 
@@ -409,13 +419,23 @@ class TryDAO():
         finally:
             conn.close()  # Ensure the connection is closed in case of error
 
-
+    def delete_recipe(self, user_id, recipe_id):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            query = "DELETE FROM to_try_entry WHERE user_id = %s AND recipe_id = %s"
+            cursor.execute(query, (user_id, recipe_id))
+            conn.commit()
+            return cursor.rowcount > 0  # Returns True if rows were affected
+        except Exception as e:
+            print(f"Failed to delete recipe: {e}")
+            return False
+        finally:
+            cursor.close()
+            conn.close()
 
     def retrieve_recipe_from_id(self, recipe_id:int): # TODO
         pass
     
     def update_recipe(self): # TODO
-        pass
-
-    def delete_recipe(self): # TODO
         pass
