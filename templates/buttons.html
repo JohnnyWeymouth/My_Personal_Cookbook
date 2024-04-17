@@ -2,7 +2,7 @@
     <form action="/remove_recipe_from_pcb" method="post" style="display: inline;">
         <input type="hidden" name="recipe_id" value="{{ item.0.recipe_id }}">
         <button type="submit" class="btn">
-            <i class="fas fa-trash" aria-hidden="true"></i> Remove from Personal Cookbook
+            <i class="fas fa-trash" aria-hidden="true"></i> Remove from Cookbook
         </button>
     </form>
 {% else %}
@@ -10,7 +10,7 @@
         <input type="hidden" name="recipe_id" value="{{ item.0.recipe_id }}">
         <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
         <button type="submit" class="btn">
-            <input type="submit" value="Add to Personal Cookbook">
+            <input type="submit" value="Add to Cookbook">
         </button>
     </form>
 
