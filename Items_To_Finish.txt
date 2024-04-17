@@ -5,9 +5,7 @@ ChangePassword page css - Kevin
 ChangeUsername page css - Kevin
 CreateNewRecipe page css - Kevin
 
-Delete Saved Recipe Button in table.html - Koby
-Make tags json - Koby
-Validate tag json - Koby
+toggle button - Koby
 
 Remove hardcoding in me page and in try page - Johnny
 Implement Cookies - Johnny

@@ -361,12 +361,18 @@ class PcbDAO():
             cursor.close()
             conn.close()
     
-    def retrieve_recipe_from_id(self, recipe_id:int): # TODO
-        pass
-    
-    def update_recipe(self): # TODO
-        pass
-
+    def check_if_saved_recipe(self, user_id, recipe_id) -> bool:
+        query = "SELECT COUNT(*) FROM personal_cookbook_entry WHERE user_id = %s AND recipe_id = %s"
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    tup = (user_id, recipe_id)
+                    cursor.execute(query, tup)
+                    count = cursor.fetchone()[0]
+                    return count != 0
+        except mysql.connector.Error as e:
+            print(f"Failed to check if saved in personal cookbook: {e}")
+            return False
 
 class TryDAO():
     def create_new_entry(self): # TODO
@@ -432,8 +438,15 @@ class TryDAO():
             cursor.close()
             conn.close()
 
-    def retrieve_recipe_from_id(self, recipe_id:int): # TODO
-        pass
-    
-    def update_recipe(self): # TODO
-        pass
+    def check_if_saved_recipe(self, user_id, recipe_id) -> bool:
+        query = "SELECT COUNT(*) FROM to_try_entry WHERE user_id = %s AND recipe_id = %s"
+        try:
+            with get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    tup = (user_id, recipe_id)
+                    cursor.execute(query, tup)
+                    count = cursor.fetchone()[0]
+                    return count != 0
+        except mysql.connector.Error as e:
+            print(f"Failed to check if saved in try list: {e}")
+            return False

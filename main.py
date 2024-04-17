@@ -33,14 +33,17 @@ def home():
     # Access each recipe_id for every Personal Cookbook Entry
     recipe_ids = [pcb_entry.recipe_id for pcb_entry in pcb_entry_list]
 
-    # Access each recipe for every recipe_id
-    recipe_list = []
-    for id in recipe_ids:
-        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
-        recipe_list.append(recipe)
+    # Access each recipe, if saved in try_list, and if saved in pcb for every recipe_id
+    items = []
+    for recipe_id in recipe_ids:
+        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(recipe_id)
+        saved_try = TryDAO().check_if_saved_recipe(user_id=session['user_id'], recipe_id=recipe_id)
+        saved_cb = True
+        tup = (recipe, saved_try, saved_cb)
+        items.append(tup)
 
     # Render the page with all the recipes
-    return render_template('my_personal_cookbook.html', items=recipe_list)
+    return render_template('my_personal_cookbook.html', items=items)
 
 # Try Recipe page TODO switch to use cookie to get user_id
 @app.route('/try_recipes', methods=['GET'])
@@ -52,13 +55,44 @@ def try_recipes():
     recipe_ids = [try_entry.recipe_id for try_entry in try_entry_list]
 
     # Access each recipe for every recipe_id
-    recipe_list = []
-    for id in recipe_ids:
-        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(id)
-        recipe_list.append(recipe)
+    items = []
+    for recipe_id in recipe_ids:
+        recipe:Recipe = RecipeDAO().retrieve_recipe_by_id(recipe_id)
+        saved_try = True
+        saved_cb = PcbDAO().check_if_saved_recipe(user_id=session['user_id'], recipe_id=recipe_id)
+        tup = (recipe, saved_try, saved_cb)
+        items.append(tup)
 
     # Render the page with all the recipes
-    return render_template('try_recipes.html', items=recipe_list)
+    return render_template('try_recipes.html', items=items)
+
+# Search Request
+@app.route('/search', methods=['GET'])
+@login_required
+def search():
+    # Get items from the request args in the URL
+    recipe_name = request.args.get('recipe_name', '')
+    description = request.args.get('description', '')
+    tags = request.args.getlist('tags')  # Gets all selected tags
+
+    # Handle the case where the form is submitted without any criteria
+    if not any([recipe_name, description, tags]):
+        flash('Please enter search criteria.', 'error')
+        return render_template('search.html')
+
+    # Make the search
+    recipes:list[Recipe] = RecipeDAO().retrieve_recipes_from_search(recipe_name, description, tags)
+
+    # Check if each recipe is saved in try_list and/or in pcb
+    items = []
+    for recipe in recipes:
+        saved_try = TryDAO().check_if_saved_recipe(user_id=session['user_id'], recipe_id=recipe.recipe_id)
+        saved_cb = PcbDAO().check_if_saved_recipe(user_id=session['user_id'], recipe_id=recipe.recipe_id)
+        tup = (recipe, saved_try, saved_cb)
+        items.append(tup)
+    
+    # Return the matching items
+    return render_template('search.html', items=items)
 
 # Recipe page that can dynamically display different recipes
 @app.route('/recipe')
@@ -77,78 +111,88 @@ def recipe_page():
 # Routes to add recipe to either cookbook or to try list
 @app.route('/add_to_personal_cookbook', methods=['POST'])
 def add_to_personal_cookbook():
+    # Access user submitted data
     recipe_id = request.form.get('recipe_id', type=int)
     user_id = request.form.get('user_id', type=int)
-    if recipe_id and user_id:
-        dao = PcbDAO()
-        if dao.add_new_entry(user_id, recipe_id):
-            flash('Recipe added to your cookbook.')
-        else:
-            flash('Recipe already in your cookbook.')
-        return redirect('/')
-    else:
-        return 'Invalid input', 400
 
-@app.route('/add_to_try_list', methods=['POST'])
-def add_to_try_list():
-    recipe_id = request.form.get('recipe_id', type=int)
-    user_id = request.form.get('user_id', type=int)
-    if recipe_id and user_id:
-        dao = TryDAO()
-        if dao.add_new_entry(user_id, recipe_id):
-            flash('Recipe added to your try list.')
-        else:
-            flash('Recipe already in your try list.')
-        return redirect('/try_recipes')
+    # Attempt to add the new entry
+    success = PcbDAO().add_new_entry(user_id, recipe_id)
+    if success:
+        flash('Recipe added to your cookbook.', 'success')
+        TryDAO().delete_recipe(user_id, recipe_id)
     else:
-        return 'Invalid input', 400
+        flash('Recipe already in your cookbook.', 'error')
     
-# Route to remove a recipe from the cookbooks    
-@app.route('/remove_recipe', methods=['POST'])
-def remove_recipe():
-    recipe_id = request.form.get('recipe_id', type=int)
-    user_id = session.get('user_id')  # Corrected session access
+    # Redirect back
     referer = request.headers.get('Referer')
-
-    if user_id is None:
-        flash('User not logged in.')
-        return redirect('/login')  # Redirect to login page if user_id is not found
-
-    pcb_dao = PcbDAO()
-    try_dao = TryDAO()
-
-    removed_from_pcb = pcb_dao.delete_recipe(user_id, recipe_id)
-    removed_from_try = try_dao.delete_recipe(user_id, recipe_id)
-
-    if removed_from_pcb or removed_from_try:
-        flash('Recipe removed from list.')
-    else:
-        flash('Error removing recipe from lists.')
-
     if referer:
         return redirect(referer)
     else:
-        return redirect('/my_personal_cookbook')  # Redirect back to the table page
+        return redirect('/')
 
-# Search Request
-@app.route('/search', methods=['GET'])
-@login_required
-def search():
-    # Get items from the request args in the URL
-    recipe_name = request.args.get('recipe_name', '')
-    description = request.args.get('description', '')
-    tags = request.args.getlist('tags')  # Gets all selected tags
+@app.route('/add_to_try_list', methods=['POST'])
+def add_to_try_list():
+    # Access user submitted data
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = request.form.get('user_id', type=int)
 
-    # Handle the case where the form is submitted without any criteria
-    if not any([recipe_name, description, tags]):
-        flash('Please enter search criteria.')
-        return render_template('search.html')
+    # Attempt to add the new entry
+    success = TryDAO().add_new_entry(user_id, recipe_id)
+    if success:
+        flash('Recipe added to your try list.', 'success')
+    else:
+        flash('Recipe already in your try list.', 'error')
 
-    # Make the search
-    recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description, tags)
+    # Redirect back
+    referer = request.headers.get('Referer')
+    if referer:
+        return redirect(referer)
+    else:
+        return redirect('/try_recipes')
     
-    # Return the matching items
-    return render_template('search.html', items=recipes)
+# Route to remove a recipe from the personal cookbook    
+@app.route('/remove_recipe_from_pcb', methods=['POST'])
+@login_required
+def remove_recipe_from_pcb():
+    # Access user submitted data
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = session.get('user_id')
+
+    # Attempt to remove the recipe
+    removed_from_pcb = PcbDAO().delete_recipe(user_id, recipe_id)
+    if removed_from_pcb:
+        flash('Recipe removed from personal cookbook.', 'success')
+    else:
+        flash('Error removing recipe from personal cookbook.', 'error')
+
+    # Redirect back
+    referer = request.headers.get('Referer')
+    if referer:
+        return redirect(referer)
+    else:
+        return redirect('/my_personal_cookbook')
+
+# Route to remove a recipe from the try list
+@app.route('/remove_recipe_from_try_list', methods=['POST'])
+@login_required
+def remove_recipe_from_try_list():
+    # Access user submitted data
+    recipe_id = request.form.get('recipe_id', type=int)
+    user_id = session.get('user_id')
+    referer = request.headers.get('Referer')
+
+    # Attempt to remove the recipe
+    success = TryDAO().delete_recipe(user_id, recipe_id)
+    if success:
+        flash('Recipe removed from try list.', 'success')
+    else:
+        flash('Error removing recipe from try list.', 'error')
+
+    # Redirect back
+    if referer:
+        return redirect(referer)
+    else:
+        return redirect('/my_personal_cookbook')
 
 # ME page Request
 @app.route('/me', methods=['GET'])
@@ -189,7 +233,7 @@ def create_recipe():
         )
 
         # TODO add this to that users personal cookbook
-        # PcbDAO().add_new_entry(user_id=session['user_id'], recipe_id=)
+        # PcbDAO().add_new_entry(user_id=session['user_id'], recipe_id=recipe_id)
 
         # Send message to page
         flash('Recipe created successfully', 'success')
