@@ -44,9 +44,36 @@
                 <label for="instructions">Instructions:</label>
                 <textarea id="instructions" name="instructions" required></textarea>
                 <br>
-                <!-- Tags -->
-                <label for="tags">Tags:</label>
-                <input type="text" id="tags" name="tags" required>
+                <!-- Tags as checkboxes -->
+                <label>Tags:</label>
+                <div>
+                    <input type="checkbox" id="dessert" name="tags" value="Dessert">
+                    <label for="dessert">Dessert</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="lunch" name="tags" value="Lunch">
+                    <label for="lunch">Lunch</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="breakfast" name="tags" value="Breakfast">
+                    <label for="breakfast">Breakfast</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="gluten_free" name="tags" value="Gluten Free">
+                    <label for="gluten_free">Gluten Free</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="vegetarian" name="tags" value="Vegetarian">
+                    <label for="vegetarian">Vegetarian</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="vegan" name="tags" value="Vegan">
+                    <label for="vegan">Vegan</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="includes_nuts" name="tags" value="Includes Nuts">
+                    <label for="includes_nuts">Includes Nuts</label>
+                </div>
                 <br>
                 <!-- Submit Button -->
                 <input type="submit" value="Create Recipe">

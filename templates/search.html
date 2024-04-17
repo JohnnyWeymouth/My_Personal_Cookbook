@@ -29,16 +29,29 @@
             <h2>Search for your new favorite recipe</h2>
             <form action="/search" method="get">
                 <!-- Name -->
-                <label for="name">Recipe Name:</label>
+                <label for="recipe_name">Recipe Name:</label>
                 <input type="text" id="recipe_name" name="recipe_name">
                 <br>
-                <!-- Quantity -->
-                <label for="quantity">Description:</label>
+                <!-- Description -->
+                <label for="description">Description:</label>
                 <input type="text" id="description" name="description">
+                <br>
+                <!-- Tags -->
+                <fieldset>
+                    <legend>Tags:</legend>
+                    <label><input type="checkbox" name="tags" value="Dessert">Dessert</label>
+                    <label><input type="checkbox" name="tags" value="Lunch">Lunch</label>
+                    <label><input type="checkbox" name="tags" value="Breakfast">Breakfast</label>
+                    <label><input type="checkbox" name="tags" value="Gluten Free">Gluten Free</label>
+                    <label><input type="checkbox" name="tags" value="Vegetarian">Vegetarian</label>
+                    <label><input type="checkbox" name="tags" value="Vegan">Vegan</label>
+                    <label><input type="checkbox" name="tags" value="Includes Nuts">Includes Nuts</label>
+                </fieldset>
                 <br>
                 <!-- Submit Button -->
                 <input type="submit" value="Search">
             </form>
+            
 
             <!-- Code for listing owned items -->
             {% if request.args and items %}

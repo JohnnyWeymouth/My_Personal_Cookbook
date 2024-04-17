@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
 from DAOs import RecipeDAO, PcbDAO, UserDAO, TryDAO
@@ -128,16 +129,18 @@ def try_recipes():
 @app.route('/search', methods=['GET'])
 @login_required
 def search():
-    # Get items from the request args in the url
-    recipe_name = request.args.get('recipe_name')
-    description = request.args.get('description')
+    # Get items from the request args in the URL
+    recipe_name = request.args.get('recipe_name', '')
+    description = request.args.get('description', '')
+    tags = request.args.getlist('tags')  # Gets all selected tags
 
-    # Render the page if there are no arguments
-    if (recipe_name is None) and (description is None):
+    # Handle the case where the form is submitted without any criteria
+    if not any([recipe_name, description, tags]):
+        flash('Please enter search criteria.')
         return render_template('search.html')
 
     # Make the search
-    recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description)
+    recipes = RecipeDAO().retrieve_recipes_from_search(recipe_name, description, tags)
     
     # Return the matching items
     return render_template('search.html', items=recipes)
@@ -149,41 +152,41 @@ def me():
     # Return the matching items
     return render_template('me.html')
 
-# Create Recipe Request
 @app.route('/create_recipe', methods=['GET', 'POST'])
 def create_recipe():
-    # If the request method is GET, simply render the create_recipe template
     if request.method == 'GET':
         return render_template('create_recipe.html')
-    
-    # If the request method is POST, take the data and add it to the db
     elif request.method == 'POST':
         # Get image bytes
         recipe_image = request.files['recipe_image']
         try:
             image_blob = recipe_image.read()
-            if len(image_blob) > 15.5 * 1024 * 1024: raise ValueError('Image size exceeds 16 MB')
-        except:
+            if len(image_blob) > 15.5 * 1024 * 1024:  # 16MB Limit
+                raise ValueError('Image size exceeds 16 MB')
+        except Exception as e:
+            flash(f'Error with image upload: {str(e)}', 'error')
             image_blob = None
 
-        # Get the tags
-        tags = request.form['tags']
+        # Handle tags
+        tags = request.form.getlist('tags')  # Gets a list of checked tags
+        tags_json = json.dumps(tags)  # Converts list to JSON string
 
-        user_id = 1 # TODO remove hardcoding
+        user_id = 1  # TODO: Replace with actual user ID handling logic
 
         # Insert recipe data into the database
-        RecipeDAO().create_recipe(
-            request.form['recipe_name'],
-            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            image_blob,
-            request.form['recipe_description'],
-            request.form['instructions'],
-            tags,
-            user_id
-        )
-
-        # Send message to page
-        flash('Recipe created successfully', 'success')
+        try:
+            RecipeDAO().create_recipe(
+                request.form['recipe_name'],
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                image_blob,
+                request.form['recipe_description'],
+                request.form['instructions'],
+                tags_json,
+                user_id
+            )
+            flash('Recipe created successfully', 'success')
+        except Exception as e:
+            flash(f'Failed to create recipe: {str(e)}', 'error')
 
         # Redirect to home
         return redirect(url_for('home'))
