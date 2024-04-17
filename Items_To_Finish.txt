@@ -5,9 +5,6 @@ ChangePassword page css - Kevin
 ChangeUsername page css - Kevin
 CreateNewRecipe page css - Kevin
 
-toggle button - Koby
-
-Remove hardcoding in me page and in try page - Johnny
 Implement Cookies - Johnny
 Clean DAOs - Johnny
 Clean Main - Johnny
