@@ -1,4 +1,4 @@
-<!-- recipe.html -->
+<!-- item.0.html -->
 
 <html>
     {% extends 'base.html' %}
@@ -8,37 +8,28 @@
     {% endblock %}
 
     {% block content %}
-<head>
-    <title>{{ recipe.recipe_name }}</title>
-</head>
-<body>
-    <h1>{{ recipe.recipe_name }}</h1>
-    <p><strong>Description:</strong> {{ recipe.recipe_description }}</p>
-    <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
-    <p><strong>Tags:</strong> {{ ' '.join(recipe.tags) }}</p>
-    <div>
-        {% if recipe.recipe_image %}
-            <img src="data:image;base64,{{ recipe.recipe_image }}" alt="{{ recipe.recipe_name }}" style="width: calc(20vh); height: calc(20vh);">
-        {% else %}
-            <p>No image available</p>
-        {% endif %}
-    </div>
-        <!-- Forms to add to personal cookbook or to try list -->
-        <form action="/add_to_personal_cookbook" method="post">
-            <input type="hidden" name="recipe_id" value="{{ recipe.recipe_id }}">
-            <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
-            <button type="submit">Add to My Cookbook</button>
-        </form>
-    
-        <form action="/add_to_try_list" method="post">
-            <input type="hidden" name="recipe_id" value="{{ recipe.recipe_id }}">
-            <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
-            <button type="submit">Add to Try List</button>
-        </form>
-    
+    <head>
+        <title>{{ item.0.recipe_name }}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
+    <body>
+        <h1>{{ item.0.recipe_name }}</h1>
+        <p><strong>Description:</strong> {{ item.0.recipe_description }}</p>
+        <p><strong>Instructions:</strong> {{ item.0.instructions }}</p>
+        <p><strong>Tags:</strong> {{ ' '.join(item.0.tags) }}</p>
+        <div>
+            {% if item.0.recipe_image %}
+                <img src="data:image;base64,{{ item.0.recipe_image }}" alt="{{ item.0.recipe_name }}" style="width: calc(20vh); height: calc(20vh);">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+        </div>
+
+        <div>
+            {% include 'buttons.html' %}
+        </div>
+
+        <button onclick="window.history.back();">Go Back</button>
     </body>
-    </html>
-    <button onclick="window.history.back();">Go Back</button>
-</body>
     {% endblock %}
 </html>
