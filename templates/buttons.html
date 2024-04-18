@@ -1,3 +1,14 @@
+<style>
+    button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+</style>
+
 {% if item.2 %}
     <form action="/remove_recipe_from_pcb" method="post" style="display: inline;">
         <input type="hidden" name="recipe_id" value="{{ item.0.recipe_id }}">
