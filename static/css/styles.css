@@ -1,7 +1,7 @@
 .alert {
-    padding: 10px; /* Padding for spacing inside the message box */
-    margin-bottom: 15px; /* Margin at the bottom to create space between the message and other content */
-    border-radius: 4px; /* Rounded corners for a softer look */
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
 }
 
 .alert.success {
@@ -59,6 +59,7 @@ img {
 
 form {
     margin-top: 20px;
+    text-align: center; 
 }
 
 button {
@@ -87,57 +88,17 @@ label {
     font-weight: bold;
 }
 
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0 15px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-fieldset {
-    margin-bottom: 15px;
-}
-
-legend {
-    font-weight: bold;
-}
-
-input[type="checkbox"] {
-    margin-right: 5px;
-}
-
-input[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-input[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-input[type="submit"]:active {
-    background-color: #3e8e41;
-}
-
-label {
-    font-weight: bold;
-}
-
 input[type="text"],
 input[type="password"],
 input[type="submit"] {
-    width: 100%;
+    width: 300px;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+    display: block; 
+    margin: 0 auto; 
 }
 
 input[type="submit"] {
@@ -167,4 +128,10 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+body {
+    background-image: url("static\images\login_background_image.png");
+    background-size: cover;
+    background-position: center;
 }
