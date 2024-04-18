@@ -410,4 +410,4 @@ def change_password():
 
 # listen on port 8080
 if __name__ == '__main__':
-    app.run(port=8080, debug=True) # TODO: Students PLEASE remove debug=True when you deploy this for production!!!!!
+    app.run(port=8080, debug=False) # TODO: Students PLEASE remove debug=True when you deploy this for production!!!!!
