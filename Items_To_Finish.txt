@@ -6,5 +6,3 @@ ChangeUsername page css - Kevin
 CreateNewRecipe page css - Kevin
 
 Clean DAOs - Johnny
-
-Fix Favicon - Sione
