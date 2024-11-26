@@ -1,8 +1,0 @@
-Recipe page css - Kevin
-Login page css - Kevin
-Register page css - Kevin
-ChangePassword page css - Kevin
-ChangeUsername page css - Kevin
-CreateNewRecipe page css - Kevin
-
-Clean DAOs - Johnny
