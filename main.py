@@ -1,16 +1,18 @@
 import os
 import json
-from flask import Flask, render_template, request, redirect, url_for, flash, session
-from dotenv import load_dotenv
-from DAOs import RecipeDAO, PcbDAO, UserDAO, TryDAO
-from Models import Recipe
-from datetime import datetime
 from functools import wraps
+from datetime import datetime
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 
-# Load environment variables from .env file
+from Models.Recipe import Recipe
+from DAOs.PCB_DAO import PcbDAO
+from DAOs.Recipe_DAO import RecipeDAO
+from DAOs.Try_DAO import TryDAO
+from DAOs.User_DAO import UserDAO
+
+# Load env and start the flask app
 load_dotenv()
-
-# Initialize the flask app
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET')
 

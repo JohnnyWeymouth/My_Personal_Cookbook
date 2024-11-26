@@ -1,16 +1,7 @@
-from pydantic import BaseModel
+import base64
 from typing import Optional, Any
 from datetime import date
-import base64
-
-class User(BaseModel):
-    user_id: int
-    username: str
-    user_email: str
-    first_name: str
-    last_name: str
-    password_hash: str
-    date_joined: date
+from pydantic import BaseModel
 
 class Recipe(BaseModel):
     recipe_id: int
@@ -27,11 +18,3 @@ class Recipe(BaseModel):
         else:
             data['recipe_image'] = None
         super().__init__(**data)
-
-class PcbEntry(BaseModel):
-    user_id: int
-    recipe_id: int
-
-class TryEntry(BaseModel):
-    user_id: int
-    recipe_id: int
