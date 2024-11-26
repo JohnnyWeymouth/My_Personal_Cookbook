@@ -22,6 +22,11 @@
             flex-direction: column; /* Stack children vertically */
             align-items: center; /* Center children horizontally */
         }
+
+        .content {
+            margin-left: 10vw; /* Adjust this value to accommodate the sidebar width */
+            padding: 20px;
+        }
     
         .sidebar img {
             width: 10vh;
@@ -47,11 +52,6 @@
             background-color: #f8d7da;
             color: #721c24;
             border-color: #f5c6cb;
-        }
-    
-        .content {
-            margin-left: 10vw; /* Adjust this value to accommodate the sidebar width */
-            padding: 20px;
         }
     </style>
 
@@ -101,7 +101,7 @@
                 {% if messages %}
                     <ul>
                         {% for category, message in messages %}
-                            <li class="flash-message flash-{{ category }}">{{ message }}</li>
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
                         {% endfor %}
                     </ul>
                 {% endif %}
