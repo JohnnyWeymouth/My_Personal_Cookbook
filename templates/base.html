@@ -6,33 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <!-- Add your CSS and other meta tags here -->
 
-    <!-- Add CSS styles for the sidebar -->
+    <!-- Sidebar CSS -->
     <style>
-        .sidebar {
+        body {
+            font-family: "Lato", sans-serif;
+            margin: 0;
+        }
+
+        .sidenav {
             height: 100%;
-            width: 10vw; /* Adjust the width as needed */
+            width: 160px; /* Adjust the width as needed */
             position: fixed;
+            z-index: 1;
             top: 0;
             left: 0;
-            background-color: #d2d2d2;
+            background-color: #111;
+            overflow-x: hidden;
             padding-top: 20px;
-            display: flex; /* Use flexbox for layout */
-            flex-direction: column; /* Stack children vertically */
-            align-items: center; /* Center children horizontally */
         }
 
-        .content {
-            margin-left: 10vw; /* Adjust this value to accommodate the sidebar width */
-            padding: 20px;
-        }
-    
-        .sidebar img {
-            width: 10vh;
-            height: 10vh; /* Set image height to one-fifth of the screen height */
+        .sidenav a {
+            text-decoration: none;
             display: block;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .sidenav img {
+            width: 100px; /* Adjust image size */
+            height: 100px;
             margin-bottom: 10px;
+        }
+
+        .sidenav a:hover img {
+            filter: brightness(1.2); /* Slightly brighten the image on hover */
+        }
+
+        .sidenav a:hover {
+            background-color: #575757;
+        }
+
+        .main {
+            margin-left: 160px; /* Same as the width of the sidenav */
+            font-size: 18px;
+            padding: 20px;
         }
 
         .flash-message {
@@ -54,48 +72,31 @@
             border-color: #f5c6cb;
         }
     </style>
-
 </head>
-
 <body>
-    <!-- sidebar.html -->
-    <div class="sidebar">
-        <ul>
-            <div>
-                <a href="/">
-                    <img src="/static/images/cookbook.png" alt="Cookbook">
-                </a>
-            </div>
 
-            <div>
-                <a href="/try_recipes">
-                    <img src="/static/images/try.png" alt="My Try List">
-                </a>
-            </div>
-
-            <div>
-                <a href="/search">
-                    <img src="/static/images/search.png" alt="Search">
-                </a>
-            </div>
-
-            <div>
-                <a href="/create_recipe">
-                    <img src="/static/images/create_recipe.png" alt="Create Recipe">
-                </a>
-            </div>
-
-            <div>
-                <a href="/me">
-                    <img src="/static/images/me.png" alt="Me">
-                </a>
-            </div>
-        </ul>
+    <!-- Sidebar -->
+    <div class="sidenav">
+        <a href="/">
+            <img src="/static/images/cookbook.png" alt="Cookbook">
+        </a>
+        <a href="/try_recipes">
+            <img src="/static/images/try.png" alt="My Try List">
+        </a>
+        <a href="/search">
+            <img src="/static/images/search.png" alt="Search">
+        </a>
+        <a href="/create_recipe">
+            <img src="/static/images/create_recipe.png" alt="Create Recipe">
+        </a>
+        <a href="/me">
+            <img src="/static/images/me.png" alt="Me">
+        </a>
     </div>
 
-    <!-- Content block -->
-    <div class="content">
-        <!-- Flash catcher -->
+    <!-- Main content -->
+    <div class="main">
+        <!-- Flash messages -->
         <div id="flash-messages">
             {% with messages = get_flashed_messages(with_categories=True) %}
                 {% if messages %}
@@ -109,6 +110,6 @@
         </div>
         {% block content %}{% endblock %}
     </div>
-    <!-- Footer, scripts, etc. -->
+
 </body>
 </html>
