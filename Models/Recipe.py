@@ -20,12 +20,14 @@ class Recipe(BaseModel):
             return base64.b64encode(value).decode('utf-8')
         return value
 
-    @field_validator("recipe_name", "recipe_description", "instructions")
-    def validate_length(cls, value, field):
+    @field_validator("recipe_name", "recipe_description", "instructions", mode="before")
+    def validate_length(cls, value: str, info:"ValidationInfo") -> str:
         """Ensures string fields do not exceed their maximum length."""
-        max_length = field.field_info.extra.get("max_length")
+        field_name = info.field_name
+        field_schema = info.field_schema
+        max_length = field_schema.get("max_length")
         if max_length and len(value) > max_length:
-            raise ValueError(f"{field.name} exceeds maximum length of {max_length} characters.")
+            raise ValueError(f"{field_name} exceeds the maximum length of {max_length} characters.")
         return value
 
     @field_validator("tags", mode='before', check_fields=True)
