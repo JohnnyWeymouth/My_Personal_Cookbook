@@ -215,14 +215,14 @@ def create_recipe():
     
     if request.method == 'POST':
         # Get image bytes
-        recipe_image = request.files['recipe_image']
+        image_file = request.files['recipe_image']
         try:
-            image_blob = recipe_image.read()
-            if len(image_blob) > 15.5 * 1024 * 1024:  # 16MB Limit
+            image_bytes:bytes = image_file.read()
+            if len(image_bytes) > 15.5 * 1024 * 1024:  # 16MB Limit
                 raise ValueError('Image size exceeds 16 MB')
         except Exception as e:
             flash(f'Error with image upload: {str(e)}', 'error')
-            image_blob = None
+            image_bytes = b''
 
         # Handle tags
         tags = request.form.getlist('tags')  # Gets a list of checked tags
@@ -232,14 +232,12 @@ def create_recipe():
         recipe_id = RecipeDAO().create_recipe(
             request.form['recipe_name'],
             datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            image_blob,
+            image_bytes,
             request.form['recipe_description'],
             request.form['instructions'],
             tags_json,
             session['user_id']
         )
-
-        print(recipe_id)
 
         # Add this to that users personal cookbook
         PcbDAO().add_new_entry(user_id=session['user_id'], recipe_id=recipe_id)
@@ -395,7 +393,7 @@ def change_password():
             return render_template('login.html')
         
         # Authenticate the user
-        user = UserDAO().authenticate_user(user_id=session['username'], password=current_password)
+        user = UserDAO().authenticate_user(session['username'], current_password)
 
         # If the current password does not match the session user, flash a warning and render
         if not user:

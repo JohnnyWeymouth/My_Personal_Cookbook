@@ -50,21 +50,6 @@ CREATE TABLE recipe (
   FOREIGN KEY (user_id) REFERENCES user(user_id)
 );
 
-CREATE TABLE ingredient (
-  ingredient_id SERIAL,
-  ingredient_name VARCHAR (255) NOT NULL,
-  PRIMARY KEY (ingredient_id)
-);
-
-CREATE TABLE recipe_ingredient (
-  quantity VARCHAR(255) NOT NULL,
-  recipe_id BIGINT UNSIGNED,
-  ingredient_id BIGINT UNSIGNED,
-  PRIMARY KEY (recipe_id, ingredient_id),
-  FOREIGN KEY (recipe_id) REFERENCES recipe(recipe_id),
-  FOREIGN KEY (ingredient_id) REFERENCES ingredient(ingredient_id)
-);
-
 CREATE TABLE personal_cookbook_entry (
   user_id BIGINT UNSIGNED,
   recipe_id BIGINT UNSIGNED,
