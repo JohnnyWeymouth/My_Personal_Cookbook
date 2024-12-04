@@ -13,30 +13,24 @@ class Recipe(BaseModel):
     tags: list[str]
     user_id: int
 
-    @field_validator("recipe_image", pre=True, always=True)
+    @field_validator("recipe_image")
     def encode_recipe_image(cls, value):
-        """
-        Encodes the image in Base64 if it's provided as bytes.
-        """
+        """Encodes the image in Base64 if it's provided as bytes."""
         if isinstance(value, bytes):
             return base64.b64encode(value).decode('utf-8')
         return value
 
     @field_validator("recipe_name", "recipe_description", "instructions")
     def validate_length(cls, value, field):
-        """
-        Ensures string fields do not exceed their maximum length.
-        """
+        """Ensures string fields do not exceed their maximum length."""
         max_length = field.field_info.extra.get("max_length")
         if max_length and len(value) > max_length:
             raise ValueError(f"{field.name} exceeds maximum length of {max_length} characters.")
         return value
 
-    @field_validator("tags", pre=True)
+    @field_validator("tags", mode='before', check_fields=True)
     def validate_tags(cls, value):
-        """
-        Ensures tags are a list of strings.
-        """
+        """Ensures tags are a list of strings."""
         if not isinstance(value, list) or not all(isinstance(tag, str) for tag in value):
             raise ValueError("Tags must be a list of strings.")
         return value
