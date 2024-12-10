@@ -60,26 +60,15 @@ class RecipeDAO():
                     query += " AND recipe_description LIKE %s"
                     params.append('%' + recipe_description + '%')
 
-                if tags:
-                    # Adjust the following based on your database's capabilities to handle JSON
-                    # For MySQL, use JSON_CONTAINS or similar
-                    # For PostgreSQL, use the containment operator @> for JSONB fields
-                    tag_conditions = " OR ".join(['JSON_CONTAINS(tags, "\\"%s\\"")' for _ in tags])
-                    query += " AND (" + tag_conditions + ")"
-                    params += tags
-
-                print(recipe_name)
-                print(recipe_description)
-                print(tags)
-                print(query)
-                print(params)
-
                 cursor.execute(query, params)
                 response = cursor.fetchall()
                 conn.close()
 
-                # Convert to Recipe Model Objects and return
+                # Convert to Recipe Model Objects
                 recipe_list = [self._convert_data_to_recipe__(recipe_data) for recipe_data in response]
+                
+                # Remove the recipes that do not have the same tags
+                recipe_list = [recipe for recipe in recipe_list if all(tag in recipe.tags for tag in tags)]
                 return recipe_list
     
     def retrieve_recipe_by_id(self, recipe_id:int) -> Recipe:
