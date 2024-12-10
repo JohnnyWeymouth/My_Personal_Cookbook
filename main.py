@@ -278,8 +278,8 @@ def login():
             # Redirect to user profile page
             return redirect('/me')
         else:
-            error_message = 'Invalid username/email or password'
-            return render_template('login.html', error_message=error_message)
+            flash('Incorrect current password', 'error')
+            return render_template('login.html')
 
 @app.route('/logout')
 @login_required
