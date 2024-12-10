@@ -53,11 +53,11 @@ class RecipeDAO():
                 params = []
 
                 if recipe_name:
-                    query += " AND recipe_name LIKE %s"
+                    query += " OR recipe_name LIKE %s"
                     params.append('%' + recipe_name + '%')
 
                 if recipe_description:
-                    query += " AND recipe_description LIKE %s"
+                    query += " OR recipe_description LIKE %s"
                     params.append('%' + recipe_description + '%')
 
                 if tags:

@@ -1,8 +1,6 @@
-from pydantic import BaseModel, Field, field_validator
-
-from typing import Optional
-from datetime import date
 import base64
+from datetime import date
+from pydantic import BaseModel, Field, field_validator
 
 class Recipe(BaseModel):
     recipe_id: int
