@@ -1,35 +1,36 @@
 from DAOs.GetConnection import get_db_connection
 from Models.User import User
+import hashlib
 
 #testing User Authentication
 class UserDAO():
-    def authenticate_user(self, username, password):
-        # Establish the connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
+    def authenticate_user(self, username:str, password:str) -> User | None:
+        """Validates a potential user's credentials."""
         try:
+            assert isinstance(username, str)
+            assert len(username) < 255
+            assert isinstance(password, str)
+        except:
+            return None
+        
+        with get_db_connection() as conn, conn.cursor() as cursor:
             query = "SELECT * FROM user WHERE (username = %s OR user_email = %s) AND password_hash = %s"
-            cursor.execute(query, (username, username, password))
+            password_hash =  hashlib.md5(password.encode()).hexdigest()
+            params_tup = (username, username, password_hash)
+            cursor.execute(query, params_tup)
             user_data = cursor.fetchone()
-            if user_data:
-                user = User(
-                    user_id=user_data[0],
-                    username=user_data[1],
-                    user_email=user_data[2],
-                    first_name=user_data[3],
-                    last_name=user_data[4],
-                    password_hash=user_data[5],
-                    date_joined=user_data[6]
-                )
-                return user
-            else:
+            if not user_data:
                 return None
-            
-        except Exception as e:
-            # Rollback the transaction if an error occurs
-            conn.rollback()
-            raise e
+            user = User(
+                user_id=user_data[0],
+                username=user_data[1],
+                user_email=user_data[2],
+                first_name=user_data[3],
+                last_name=user_data[4],
+                password_hash=user_data[5],
+                date_joined=user_data[6]
+            )
+            return user
     
     def is_username_taken(self, username):
         # Establish the connection
@@ -82,8 +83,9 @@ class UserDAO():
         
         try:
             # Insert the new user into the database
+            password_hash =  hashlib.md5(password.encode()).hexdigest()
             query = "INSERT INTO user (username, user_email, first_name, last_name, password_hash, date_joined) VALUES (%s, %s, %s, %s, %s, NOW())"
-            tup = (username, email, first_name, last_name, password)
+            tup = (username, email, first_name, last_name, password_hash)
             cursor.execute(query, tup)
             
             # Commit the transaction
@@ -152,14 +154,16 @@ class UserDAO():
             print("Error updating email:", e)
             return False  # Return False if update failed
     
-    def update_password(self, user_id, new_password):
+    def update_password(self, user_id:int, new_password:str):
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
 
+            new_password_hash =  hashlib.md5(new_password.encode()).hexdigest()
+
             # Update the user's password in the database
             query = "UPDATE user SET password_hash = %s WHERE user_id = %s"
-            cursor.execute(query, (new_password, user_id))
+            cursor.execute(query, (new_password_hash, user_id))
 
             # Commit the transaction
             conn.commit()

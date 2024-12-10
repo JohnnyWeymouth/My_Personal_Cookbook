@@ -36,6 +36,9 @@ class RecipeDAO():
             assert isinstance(recipe_name, str)
             assert isinstance(recipe_description, str)
             assert isinstance(tags, list)
+            assert len(recipe_name) <= 255
+            assert len(recipe_description) <= 3000
+            assert len(str(tags)) <= 255
             assert all(isinstance(item, str) for item in tags)
         except:
             return []
