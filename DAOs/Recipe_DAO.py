@@ -6,30 +6,27 @@ from Models.Recipe import Recipe
 class RecipeDAO():
     def create_recipe(self, recipe_name:str, date_created:str, recipe_image:str, recipe_description:str, instructions:str, tags:str, user_id:int) -> str:
         """Creates a new recipe in the database."""
-        # Create a new database connection using a context manager
-        with get_db_connection() as conn:
-            # Create a cursor using a context manager
-            with conn.cursor() as cursor:
-                # Create the query with placeholders
-                query = """
-                INSERT INTO recipe 
-                (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """
-                
-                # Execute the query with the data
-                tup = (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id)
-                cursor.execute(query, tup)
-                
-                # Commit changes
-                conn.commit()
-                
-                # Get the recipe_id of the last inserted row
-                recipe_id = cursor.lastrowid
-                
-                # Return the recipe_id
-                return str(recipe_id)
-
+        # Create a new database connection and cursor using a context manager
+        with get_db_connection() as conn, conn.cursor() as cursor:
+            # Create the query with placeholders
+            query = """
+            INSERT INTO recipe 
+            (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            
+            # Execute the query with the data
+            tup = (recipe_name, date_created, recipe_image, recipe_description, instructions, tags, user_id)
+            cursor.execute(query, tup)
+            
+            # Commit changes
+            conn.commit()
+            
+            # Get the recipe_id of the last inserted row
+            recipe_id = cursor.lastrowid
+            
+            # Return the recipe_id
+            return str(recipe_id)
 
     def retrieve_recipes_from_search(self, recipe_name:str, recipe_description:str, tags:list[str]) -> list[Recipe]:
         """Retrieves recipes matching the search criteria including tags.\n        
@@ -45,7 +42,7 @@ class RecipeDAO():
 
         # Create a new database connection and cursor using a context manager
         with get_db_connection() as conn, conn.cursor() as cursor:
-            
+
             # Build the query dynamically based on provided inputs (but not including them)
             query = "SELECT * FROM recipe WHERE 1=1"
             params = []
@@ -75,22 +72,21 @@ class RecipeDAO():
         # Check that the search arguments are strings
         assert isinstance(recipe_id, int)
 
-        # Create a new database connection and cursor
-        with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+        # Create a new database connection and cursor using a context manager
+        with get_db_connection() as conn, conn.cursor() as cursor:
 
-                # Create the query
-                query = "SELECT * FROM recipe WHERE recipe_id = %s"
-                tup = (recipe_id,)
-                cursor.execute(query, tup)
+            # Create the query
+            query = "SELECT * FROM recipe WHERE recipe_id = %s"
+            tup = (recipe_id,)
+            cursor.execute(query, tup)
 
-                # Get the response and close the connection
-                response = cursor.fetchall()
-                conn.close()
+            # Get the response and close the connection
+            response = cursor.fetchall()
+            conn.close()
 
-                # Convert to a Recipe Model Object and return
-                recipe = self._convert_data_to_recipe__(response[0])
-                return recipe
+            # Convert to a Recipe Model Object and return
+            recipe = self._convert_data_to_recipe__(response[0])
+            return recipe
 
     def retrieve_recipes_by_author(self, user_id:int): # TODO
         pass
