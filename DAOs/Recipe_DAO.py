@@ -43,33 +43,30 @@ class RecipeDAO():
         except:
             return []
 
-        # Create a new database connection using a context manager
-        with get_db_connection() as conn:
-            # Create a cursor using a context manager
-            with conn.cursor() as cursor:
+        # Create a new database connection and cursor using a context manager
+        with get_db_connection() as conn, conn.cursor() as cursor:
+            
+            # Build the query dynamically based on provided inputs (but not including them)
+            query = "SELECT * FROM recipe WHERE 1=1"
+            params = []
+            if recipe_name:
+                query += " AND recipe_name LIKE %s"
+                params.append('%' + recipe_name + '%')
+            if recipe_description:
+                query += " AND recipe_description LIKE %s"
+                params.append('%' + recipe_description + '%')
+            cursor.execute(query, params)
+            response = cursor.fetchall()
+            conn.close()
 
-                # Start building the query dynamically based on provided inputs
-                query = "SELECT * FROM recipe WHERE 1=1"
-                params = []
+            # Convert to Recipe Model Objects
+            recipe_list = [self._convert_data_to_recipe__(recipe_data) for recipe_data in response]
+            
+            # Remove the recipes that do not have the same tags
+            recipe_list = [recipe for recipe in recipe_list if all(tag in recipe.tags for tag in tags)]
 
-                if recipe_name:
-                    query += " AND recipe_name LIKE %s"
-                    params.append('%' + recipe_name + '%')
-
-                if recipe_description:
-                    query += " AND recipe_description LIKE %s"
-                    params.append('%' + recipe_description + '%')
-
-                cursor.execute(query, params)
-                response = cursor.fetchall()
-                conn.close()
-
-                # Convert to Recipe Model Objects
-                recipe_list = [self._convert_data_to_recipe__(recipe_data) for recipe_data in response]
-                
-                # Remove the recipes that do not have the same tags
-                recipe_list = [recipe for recipe in recipe_list if all(tag in recipe.tags for tag in tags)]
-                return recipe_list
+            # Return the matching recipes, if any
+            return recipe_list
     
     def retrieve_recipe_by_id(self, recipe_id:int) -> Recipe:
         """Retrieves the recipe that matches the recipe_id.\n        
